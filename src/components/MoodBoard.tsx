@@ -136,7 +136,7 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
   const todayPick = wildPicks[new Date().getDate() % wildPicks.length];
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
       <div className="max-w-lg w-full space-y-8">
         <header className="text-center space-y-4">
           <h1 className="text-5xl font-extrabold tracking-tight text-foreground">
@@ -164,7 +164,6 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
                 onMouseEnter={() => setGuideText(guideMessages[mood.id])}
                 onMouseLeave={() => setGuideText(defaultGuide)}
                 className={`h-24 w-full p-0 relative overflow-hidden ${animating === mood.id ? 'fixed inset-0 z-50 scale-150 flex items-center justify-center text-2xl' : 'text-center'}`}
-                className={`h-24 w-full p-0 relative ${animating === mood.id ? 'fixed inset-0 z-50 scale-150 flex items-center justify-center text-2xl' : 'text-center'}`}
               >
                 <div className="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
                   <div className="absolute inset-0 flex flex-col items-center justify-center [backface-visibility:hidden]">
@@ -172,7 +171,6 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
                     <span className="text-sm font-medium">{mood.label}</span>
                   </div>
                   <div className="absolute inset-0 w-full h-full p-2 text-xs leading-tight flex items-center justify-center text-center whitespace-normal break-words overflow-hidden [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                  <div className="absolute inset-0 p-2 text-xs flex items-center justify-center text-center [backface-visibility:hidden] [transform:rotateY(180deg)]">
                     {mood.tagline}
                   </div>
                 </div>
@@ -210,4 +208,4 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
       </div>
     </div>
   );
-};
+}
