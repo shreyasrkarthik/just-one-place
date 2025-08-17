@@ -35,7 +35,7 @@ export const LocationRequest = ({ onLocationGranted, onLocationDenied, mood, err
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
       <div className="max-w-md w-full space-y-6">
         <div className="flex items-center justify-center gap-2 text-muted-foreground">
-          <span className="text-3xl">😏</span>
+          <span className="text-3xl">✨</span>
           <p className="text-sm text-center max-w-xs">{guideText}</p>
         </div>
         <Card className="p-8 bg-gradient-card shadow-card-custom border-0 text-center space-y-6">
