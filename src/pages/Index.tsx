@@ -120,6 +120,7 @@ const Index = () => {
       <LocationRequest
         onLocationGranted={handleLocationGranted}
         onLocationDenied={handleLocationDenied}
+        mood={selectedMood}
         error={locationError}
       />
     );

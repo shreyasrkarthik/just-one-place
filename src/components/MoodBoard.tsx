@@ -85,6 +85,20 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
   const [rolling, setRolling] = useState(false);
   const [slotText, setSlotText] = useState("Surprise Me");
   const diceRef = useRef<HTMLImageElement>(null);
+  const defaultGuide = "Hover a mood and I'll talk to you.";
+  const [guideText, setGuideText] = useState(defaultGuide);
+
+  const guideMessages: Record<string, string> = {
+    restless: "Oh, restless today? Let's burn some calories!",
+    sad: "Sad? Don't worry, I've got cake lined up for you 🍰.",
+    romantic: "Ooh, romantic? I've got date night plans.",
+    anxious: "Anxious? Let's find somewhere chill.",
+    celebratory: "Celebrating? Confetti coming right up!",
+    bored: "Bored? Not on my watch.",
+    energetic: "Energetic? Let's channel that buzz!",
+    adventurous: "Feeling bold? Adventure awaits!",
+    nostalgic: "Nostalgic? Let's take a trip down memory lane.",
+  };
 
   const handleMoodClick = (mood: Mood) => {
     confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 }, colors: [mood.color] });
@@ -135,6 +149,10 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
           <p className="text-muted-foreground text-lg">
             We'll boss you around and send you somewhere cool 😎.
           </p>
+          <div className="flex items-center justify-center gap-2 text-muted-foreground">
+            <span className="text-3xl">✨</span>
+            <p className="text-sm max-w-xs">{guideText}</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-4">
@@ -143,6 +161,9 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
               <Button
                 variant="mood"
                 onClick={() => handleMoodClick(mood)}
+                onMouseEnter={() => setGuideText(guideMessages[mood.id])}
+                onMouseLeave={() => setGuideText(defaultGuide)}
+                className={`h-24 w-full p-0 relative overflow-hidden ${animating === mood.id ? 'fixed inset-0 z-50 scale-150 flex items-center justify-center text-2xl' : 'text-center'}`}
                 className={`h-24 w-full p-0 relative ${animating === mood.id ? 'fixed inset-0 z-50 scale-150 flex items-center justify-center text-2xl' : 'text-center'}`}
               >
                 <div className="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
@@ -150,6 +171,7 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
                     <img src={mood.image} alt={mood.label} className="w-8 h-8 mb-1" />
                     <span className="text-sm font-medium">{mood.label}</span>
                   </div>
+                  <div className="absolute inset-0 w-full h-full p-2 text-xs leading-tight flex items-center justify-center text-center whitespace-normal break-words overflow-hidden [backface-visibility:hidden] [transform:rotateY(180deg)]">
                   <div className="absolute inset-0 p-2 text-xs flex items-center justify-center text-center [backface-visibility:hidden] [transform:rotateY(180deg)]">
                     {mood.tagline}
                   </div>
