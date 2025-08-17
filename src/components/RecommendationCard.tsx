@@ -8,7 +8,7 @@ interface Recommendation {
   imageUrl: string;
   mapsUrl: string;
   mood: string;
-  moodEmoji: string;
+  moodImage: string;
   openHours: string;
   distance: string;
 }
@@ -34,8 +34,9 @@ export const RecommendationCard = ({
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
       <div className="max-w-md w-full space-y-6">
         <div className="text-center">
-          <p className="text-lg text-muted-foreground mb-2">
-            Your Mood: {recommendation.moodEmoji} {recommendation.mood}
+          <p className="text-lg text-muted-foreground mb-2 flex items-center gap-2 justify-center">
+            <img src={`/vibes/${recommendation.moodImage}`} alt={recommendation.mood} className="w-6 h-6" />
+            <span>Your Mood: {recommendation.mood}</span>
           </p>
         </div>
 

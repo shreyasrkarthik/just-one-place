@@ -148,20 +148,20 @@ const moodRecommendations: Record<string, MockRecommendation[]> = {
   ]
 };
 
-const moodLabels: Record<string, { label: string; emoji: string }> = {
-  restless: { label: "Restless", emoji: "😵" },
-  sad: { label: "Sad", emoji: "😔" },
-  romantic: { label: "Romantic", emoji: "❤️" },
-  anxious: { label: "Anxious", emoji: "🤯" },
-  celebratory: { label: "Celebratory", emoji: "🎉" },
-  bored: { label: "Bored", emoji: "😴" },
-  energetic: { label: "Energetic", emoji: "⚡" },
-  adventurous: { label: "Adventurous", emoji: "🗺️" },
-  nostalgic: { label: "Nostalgic", emoji: "🕰️" },
-  surprise: { label: "Surprise Me", emoji: "🎲" }
+const moodLabels: Record<string, { label: string; image: string }> = {
+  restless: { label: "Restless", image: "restless.png" },
+  sad: { label: "Sad", image: "sad.png" },
+  romantic: { label: "Romantic", image: "romantic.png" },
+  anxious: { label: "Anxious", image: "anxious.png" },
+  celebratory: { label: "Celebratory", image: "celebratory.png" },
+  bored: { label: "Bored", image: "bored.png" },
+  energetic: { label: "Energetic", image: "energetic.png" },
+  adventurous: { label: "Adventurous", image: "adventorous.png" },
+  nostalgic: { label: "Nostalgic", image: "nostalgic.png" },
+  surprise: { label: "Surprise Me", image: "surprise.png" }
 };
 
-export const getRecommendation = (mood: string, reroll: boolean = false): MockRecommendation & { mood: string; moodEmoji: string } => {
+export const getRecommendation = (mood: string, reroll: boolean = false): MockRecommendation & { mood: string; moodImage: string } => {
   const recommendations = moodRecommendations[mood] || moodRecommendations.surprise;
   const randomIndex = reroll ? 1 : 0; // Simple reroll logic - use second option if available
   const rec = recommendations[Math.min(randomIndex, recommendations.length - 1)];
@@ -170,6 +170,6 @@ export const getRecommendation = (mood: string, reroll: boolean = false): MockRe
   return {
     ...rec,
     mood: moodInfo.label,
-    moodEmoji: moodInfo.emoji
+    moodImage: moodInfo.image
   };
 };
