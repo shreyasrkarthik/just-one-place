@@ -1,21 +1,33 @@
+import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { MapPin, Clock, AlertCircle } from "lucide-react";
 
 interface LocationRequestProps {
   onLocationGranted: () => void;
-  onLocationDenied: () => void;
+  onZipSubmit: (zip: string) => void;
   mood: string;
   error?: string;
 }
 
-export const LocationRequest = ({ onLocationGranted, onLocationDenied, mood, error }: LocationRequestProps) => {
+export const LocationRequest = ({ onLocationGranted, onZipSubmit, mood, error }: LocationRequestProps) => {
+  const [showZipInput, setShowZipInput] = useState(false);
+  const [zip, setZip] = useState("");
+
   const handleRequestLocation = () => {
     navigator.geolocation.getCurrentPosition(
       () => onLocationGranted(),
-      () => onLocationDenied(),
+      () => setShowZipInput(true),
       { enableHighAccuracy: true, timeout: 10000 }
     );
+  };
+
+  const handleZipSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (zip.trim()) {
+      onZipSubmit(zip.trim());
+    }
   };
 
   const guideMessages: Record<string, string> = {
@@ -32,7 +44,7 @@ export const LocationRequest = ({ onLocationGranted, onLocationDenied, mood, err
   const guideText = guideMessages[mood] ?? "Ready for an adventure?";
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6">
       <div className="max-w-md w-full space-y-6">
         <div className="flex items-center justify-center gap-2 text-muted-foreground">
           <span className="text-3xl">✨</span>
@@ -59,22 +71,36 @@ export const LocationRequest = ({ onLocationGranted, onLocationDenied, mood, err
           )}
 
           <div className="space-y-3">
-            <Button 
-              variant="action" 
+            <Button
+              variant="action"
               onClick={handleRequestLocation}
               className="w-full h-12"
             >
               <MapPin className="w-4 h-4 mr-2" />
               Share My Location
             </Button>
-            
-            <Button 
-              variant="ghost" 
-              onClick={onLocationDenied}
+
+            <Button
+              variant="ghost"
+              onClick={() => setShowZipInput(true)}
               className="w-full text-muted-foreground"
             >
               I'll enter my ZIP code instead
             </Button>
+
+            {showZipInput && (
+              <form onSubmit={handleZipSubmit} className="flex gap-2 pt-2">
+                <Input
+                  value={zip}
+                  onChange={(e) => setZip(e.target.value)}
+                  placeholder="Enter ZIP code"
+                  className="flex-1"
+                />
+                <Button type="submit" variant="action">
+                  Go
+                </Button>
+              </form>
+            )}
           </div>
 
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
