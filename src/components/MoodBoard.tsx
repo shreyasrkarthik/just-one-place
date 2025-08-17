@@ -150,7 +150,7 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
             We'll boss you around and send you somewhere cool 😎.
           </p>
           <div className="flex items-center justify-center gap-2 text-muted-foreground">
-            <span className="text-3xl">😏</span>
+            <span className="text-3xl">✨</span>
             <p className="text-sm max-w-xs">{guideText}</p>
           </div>
         </div>
