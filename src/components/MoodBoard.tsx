@@ -25,11 +25,20 @@ interface MoodBoardProps {
 export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-foreground">
-            Pick your vibe 👇
+      <div className="max-w-lg w-full space-y-8">
+        <header className="text-center space-y-4">
+          <h1 className="text-5xl font-extrabold tracking-tight text-foreground">
+            Just One Place
           </h1>
+          <p className="text-lg text-muted-foreground">
+            Built for the chronically indecisive and the adventurous alike. One mood in, one spot out—no endless scrolling required.
+          </p>
+        </header>
+
+        <div className="text-center space-y-2">
+          <h2 className="text-4xl font-bold text-foreground">
+            Pick your vibe 👇
+          </h2>
           <p className="text-muted-foreground text-lg">
             We'll find you the perfect spot
           </p>
@@ -57,9 +66,12 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
           🎲 Surprise Me
         </Button>
 
-        <div className="text-center">
+        <div className="text-center space-y-1">
           <p className="text-xs text-muted-foreground">
             No endless lists. Just one perfect recommendation.
+          </p>
+          <p className="text-xs text-muted-foreground italic">
+            Warning: side effects may include spontaneous fun.
           </p>
         </div>
       </div>
