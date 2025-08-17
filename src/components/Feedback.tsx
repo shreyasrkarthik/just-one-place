@@ -39,7 +39,8 @@ export const Feedback = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/feedback', {
+      const apiBase = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
+      const response = await fetch(`${apiBase}/api/feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

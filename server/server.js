@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import nodemailer from 'nodemailer';
 import rateLimit from 'express-rate-limit';
 // Load .env from the current directory
 dotenv.config();
@@ -23,18 +22,9 @@ const feedbackLimiter = rateLimit({
   message: 'Too many feedback submissions from this IP, please try again later.'
 });
 
-// Email configuration
-const createTransporter = () => {
-  // For development, using Mailtrap Live SMTP
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'live.smtp.mailtrap.io',
-    port: process.env.SMTP_PORT || 587,
-    auth: {
-      user: process.env.SMTP_USER || 'api',
-      pass: process.env.SMTP_PASS
-    }
-  });
-};
+// Mailtrap API configuration
+const MAILTRAP_API_URL = 'https://send.api.mailtrap.io/api/send';
+const MAILTRAP_TOKEN = process.env.SMTP_PASS; // token stored in .env
 
 // Feedback endpoint
 app.post('/api/feedback', feedbackLimiter, async (req, res) => {
@@ -54,35 +44,36 @@ app.post('/api/feedback', feedbackLimiter, async (req, res) => {
       });
     }
 
-    // Create email content
-    const mailOptions = {
-      from: process.env.FROM_EMAIL || 'noreply@justoneplace.com',
-      to: process.env.TO_EMAIL || 'shellshock1947@gmail.com',
-      subject: `Feedback from ${name} - Just One Place`,
-      html: `
-        <h2>New Feedback Received</h2>
-        <p><strong>From:</strong> ${name} (${email})</p>
-        <p><strong>Message:</strong></p>
-        <p>${message.replace(/\n/g, '<br>')}</p>
-        <hr>
-        <p><em>This feedback was submitted from the Just One Place app.</em></p>
-      `,
-      text: `
-        New Feedback Received
-        
-        From: ${name} (${email})
-        Message: ${message}
-        
-        This feedback was submitted from the Just One Place app.
-      `
-    };
+    // Prepare email content for Mailtrap API
+    const textContent = `Name: ${name}\nEmail: ${email}\nMessage: ${message}`;
 
-    // Send email
-    const transporter = createTransporter();
-    await transporter.sendMail(mailOptions);
+    const response = await fetch(MAILTRAP_API_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${MAILTRAP_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: {
+          email: process.env.FROM_EMAIL || 'hello@demomailtrap.co',
+          name: 'Mailtrap Test'
+        },
+        to: [
+          { email: process.env.TO_EMAIL || 'shellshock1947@gmail.com' }
+        ],
+        subject: `Vibe Pick: Feedback ${email}`,
+        text: textContent,
+        category: 'Integration Test'
+      })
+    });
 
-    res.status(200).json({ 
-      message: 'Feedback sent successfully' 
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Mailtrap API error: ${response.status} ${errorText}`);
+    }
+
+    res.status(200).json({
+      message: 'Feedback sent successfully'
     });
 
   } catch (error) {
