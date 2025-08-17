@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
+import { MailtrapClient } from 'mailtrap';
 // Load .env from the current directory
 dotenv.config();
 
@@ -23,8 +24,9 @@ const feedbackLimiter = rateLimit({
 });
 
 // Mailtrap API configuration
-const MAILTRAP_API_URL = 'https://send.api.mailtrap.io/api/send';
-const MAILTRAP_TOKEN = process.env.SMTP_PASS; // token stored in .env
+const MAILTRAP_TOKEN = process.env.MAILTRAP_TOKEN;
+const mailtrapClient = new MailtrapClient({ token: MAILTRAP_TOKEN });
+mailtrapClient.axios.defaults.maxRedirects = 5;
 
 // Feedback endpoint
 app.post('/api/feedback', feedbackLimiter, async (req, res) => {
@@ -47,30 +49,18 @@ app.post('/api/feedback', feedbackLimiter, async (req, res) => {
     // Prepare email content for Mailtrap API
     const textContent = `Name: ${name}\nEmail: ${email}\nMessage: ${message}`;
 
-    const response = await fetch(MAILTRAP_API_URL, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${MAILTRAP_TOKEN}`,
-        'Content-Type': 'application/json'
+    await mailtrapClient.send({
+      from: {
+        email: process.env.FROM_EMAIL || 'hello@demomailtrap.co',
+        name: 'Mailtrap Test'
       },
-      body: JSON.stringify({
-        from: {
-          email: process.env.FROM_EMAIL || 'hello@demomailtrap.co',
-          name: 'Mailtrap Test'
-        },
-        to: [
-          { email: process.env.TO_EMAIL || 'shellshock1947@gmail.com' }
-        ],
-        subject: `Vibe Pick: Feedback ${email}`,
-        text: textContent,
-        category: 'Integration Test'
-      })
+      to: [
+        { email: process.env.TO_EMAIL || 'shellshock1947@gmail.com' }
+      ],
+      subject: `Vibe Pick: Feedback ${email}`,
+      text: textContent,
+      category: 'Integration Test'
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Mailtrap API error: ${response.status} ${errorText}`);
-    }
 
     res.status(200).json({
       message: 'Feedback sent successfully'
