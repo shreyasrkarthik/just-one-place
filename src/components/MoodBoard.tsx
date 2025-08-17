@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, type CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 import confetti from "canvas-confetti";
 
@@ -83,8 +83,10 @@ interface MoodBoardProps {
 export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
   const [animating, setAnimating] = useState<string | null>(null);
   const [rolling, setRolling] = useState(false);
-  const [slotText, setSlotText] = useState("Surprise Me");
+  const [slotItems, setSlotItems] = useState<string[]>(["Surprise Me"]);
+  const [slotAnimating, setSlotAnimating] = useState(false);
   const diceRef = useRef<HTMLImageElement>(null);
+  const mascotRef = useRef<HTMLImageElement>(null);
   const defaultGuide = "Hover a mood and I'll talk to you.";
   const [guideText, setGuideText] = useState(defaultGuide);
 
@@ -101,57 +103,60 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
   };
 
   const handleMoodClick = (mood: Mood) => {
+    setGuideText(`Woohoo! ${mood.label}!`);
+    mascotRef.current?.classList.add("animate-bounce");
     confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 }, colors: [mood.color] });
     setAnimating(mood.id);
     setTimeout(() => {
+      mascotRef.current?.classList.remove("animate-bounce");
       setAnimating(null);
       onMoodSelect(mood.id);
     }, 600);
   };
 
   const handleSurprise = () => {
+    if (rolling) return;
+    setGuideText("Rolling the dice...");
+    const finalMood = moods[Math.floor(Math.random() * moods.length)];
+    const items = Array.from({ length: 8 }, () => moods[Math.floor(Math.random() * moods.length)].label);
+    items.push(finalMood.label);
+    setSlotItems(items);
     setRolling(true);
-    const interval = setInterval(() => {
-      const m = moods[Math.floor(Math.random() * moods.length)];
-      setSlotText(m.label);
-    }, 100);
+    requestAnimationFrame(() => setSlotAnimating(true));
+    diceRef.current?.classList.add("roll-dice");
     setTimeout(() => {
-      clearInterval(interval);
-      const m = moods[Math.floor(Math.random() * moods.length)];
-      setSlotText(m.label);
-      diceRef.current?.classList.add("roll-dice");
-      setTimeout(() => {
-        diceRef.current?.classList.remove("roll-dice");
-        setRolling(false);
-        handleMoodClick(m);
-      }, 1000);
+      diceRef.current?.classList.remove("roll-dice");
+      setSlotAnimating(false);
+      setRolling(false);
+      setSlotItems(["Surprise Me"]);
+      handleMoodClick(finalMood);
     }, 1000);
   };
 
   const wildPicks = [
-    "Feeling nostalgic? Here's a retro arcade near you.",
-    "Craving chaos? Try indoor skydiving.",
-    "Need sugar? There's a donut truck around the corner.",
+    { text: "Feeling nostalgic? Here's a retro arcade near you.", link: "https://example.com/blog/retro-arcade" },
+    { text: "Craving chaos? Try indoor skydiving.", link: "https://example.com/blog/indoor-skydiving" },
+    { text: "Need sugar? There's a donut truck around the corner.", link: "https://example.com/blog/donut-truck" },
   ];
   const todayPick = wildPicks[new Date().getDate() % wildPicks.length];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6">
       <div className="max-w-lg w-full space-y-8">
         <header className="text-center space-y-4">
-          <h1 className="text-5xl font-extrabold tracking-tight text-foreground">
+          <h1 className="font-heading text-5xl font-extrabold tracking-tight text-foreground">
             Vibe Pick
           </h1>
         </header>
 
         <div className="text-center space-y-2">
-          <h2 className="text-4xl font-bold text-foreground">Pick your vibe 👇</h2>
+          <h2 className="font-heading text-4xl font-bold text-foreground">What's your vibe? 👇</h2>
           <p className="text-muted-foreground text-lg">
-            We'll boss you around and send you somewhere cool 😎.
+            We'll boss you around and send you somewhere cool 😎. Don't overthink it.
           </p>
           <div className="flex items-center justify-center gap-2 text-muted-foreground">
-            <span className="text-3xl">✨</span>
-            <p className="text-sm max-w-xs">{guideText}</p>
+            <img ref={mascotRef} src="/mascot.svg" alt="mascot" className="h-10 w-10" />
+            <p className="text-sm max-w-xs p-2 bg-card/70 rounded-lg shadow">{guideText}</p>
           </div>
         </div>
 
@@ -167,7 +172,11 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
               >
                 <div className="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
                   <div className="absolute inset-0 flex flex-col items-center justify-center [backface-visibility:hidden]">
-                    <img src={mood.image} alt={mood.label} className="w-8 h-8 mb-1" />
+                    <img
+                      src={mood.image}
+                      alt={mood.label}
+                      className={`w-8 h-8 mb-1 transition-transform duration-500 ${mood.id === 'celebratory' ? 'group-hover:scale-125 group-hover:rotate-12' : ''} ${mood.id === 'energetic' ? 'group-hover:animate-pulse' : ''}`}
+                    />
                     <span className="text-sm font-medium">{mood.label}</span>
                   </div>
                   <div className="absolute inset-0 w-full h-full p-2 text-xs leading-tight flex items-center justify-center text-center whitespace-normal break-words overflow-hidden [backface-visibility:hidden] [transform:rotateY(180deg)]">
@@ -184,8 +193,24 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
           onClick={rolling ? undefined : handleSurprise}
           className="w-full h-14 text-lg relative overflow-hidden"
         >
-          <span>{slotText}</span>
-          <img ref={diceRef} src="/vibes/surprise.png" alt="dice" className="h-6 w-6 absolute -left-8 top-1/2 -translate-y-1/2" />
+          <div className="h-6 overflow-hidden mx-auto">
+            <div
+              className={`slot-list ${slotAnimating ? 'slot-animate' : ''}`}
+              style={{ '--items': slotItems.length - 1 } as CSSProperties}
+            >
+              {slotItems.map((text, i) => (
+                <div key={i} className="h-6 flex items-center justify-center">
+                  {text}
+                </div>
+              ))}
+            </div>
+          </div>
+          <img
+            ref={diceRef}
+            src="/vibes/surprise.png"
+            alt="dice"
+            className="h-6 w-6 absolute -left-8 top-1/2 -translate-y-1/2"
+          />
         </Button>
 
         <div className="text-center space-y-4">
@@ -199,10 +224,14 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
           </div>
 
           <div className="space-y-2">
-            <h3 className="text-xl font-bold text-foreground">Today's Wild Pick</h3>
-            <div className="bg-gradient-card p-4 rounded-lg shadow-card-custom">
-              <p className="text-sm text-muted-foreground">{todayPick}</p>
-            </div>
+            <h3 className="font-heading text-xl font-bold text-foreground">Today's Wild Pick</h3>
+            <a
+              href={todayPick.link}
+              target="_blank"
+              className="block bg-gradient-card p-4 rounded-lg shadow-card-custom hover:shadow-lg transition-shadow"
+            >
+              <p className="text-sm text-muted-foreground">{todayPick.text}</p>
+            </a>
           </div>
         </div>
       </div>

@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -118,7 +119,41 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: linear-gradient(120deg, hsl(var(--background)), hsl(var(--accent)), hsl(var(--secondary)));
+    background-size: 400% 400%;
+    animation: backgroundShift 30s ease infinite;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
+  }
+}
+
+@keyframes backgroundShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.slot-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.slot-animate {
+  animation: slot-roll 1s ease-in-out forwards;
+}
+
+@keyframes slot-roll {
+  to {
+    transform: translateY(calc(var(--items) * -1.5rem));
   }
 }
 
