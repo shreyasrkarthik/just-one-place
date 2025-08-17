@@ -1,4 +1,5 @@
 import { UserLocation, getDistanceInMiles } from "./location";
+import { getMoodImage } from "./moodImages";
 
 interface Place {
   name: string;
@@ -192,7 +193,7 @@ export const getLocationAwareRecommendation = async (
     name: selectedPlace.name,
     address: fullAddress,
     reason: reasons[reasonIndex],
-    imageUrl: "/lovable-uploads/490baa65-3ec1-4eea-83ad-b1f38758491d.png",
+    imageUrl: getMoodImage(mood),
     mapsUrl: `https://maps.apple.com/?q=${encodeURIComponent(selectedPlace.name + " " + fullAddress)}`,
     mood: moodInfo.label,
     moodEmoji: moodInfo.emoji,
