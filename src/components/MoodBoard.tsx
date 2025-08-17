@@ -140,7 +140,7 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
       <div className="max-w-lg w-full space-y-8">
         <header className="text-center space-y-4">
           <h1 className="text-5xl font-extrabold tracking-tight text-foreground">
-            Just One Place
+            Vibe Pick
           </h1>
         </header>
 
