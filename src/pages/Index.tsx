@@ -3,6 +3,7 @@ import { MoodBoard } from "@/components/MoodBoard";
 import { LocationRequest } from "@/components/LocationRequest";
 import { LoadingRecommendation } from "@/components/LoadingRecommendation";
 import { RecommendationCard } from "@/components/RecommendationCard";
+import Feedback from "@/components/Feedback";
 import { getCurrentLocation, UserLocation } from "@/utils/location";
 import { getLocationAwareRecommendation, LocationAwareRecommendation } from "@/utils/placesService";
 import { toast } from "@/hooks/use-toast";
@@ -110,22 +111,19 @@ const Index = () => {
     }
   };
 
-  // State routing
-  if (state === "mood-selection") {
-    return <MoodBoard onMoodSelect={handleMoodSelect} />;
-  }
+  let content;
 
-  if (state === "location-request") {
-    return (
-      <LocationRequest 
+  if (state === "mood-selection") {
+    content = <MoodBoard onMoodSelect={handleMoodSelect} />;
+  } else if (state === "location-request") {
+    content = (
+      <LocationRequest
         onLocationGranted={handleLocationGranted}
         onLocationDenied={handleLocationDenied}
         error={locationError}
       />
     );
-  }
-
-  if (state === "loading") {
+  } else if (state === "loading") {
     const moodLabels: Record<string, { label: string; emoji: string }> = {
       restless: { label: "Restless", emoji: "😵" },
       sad: { label: "Sad", emoji: "😔" },
@@ -138,25 +136,36 @@ const Index = () => {
       nostalgic: { label: "Nostalgic", emoji: "🕰️" },
       surprise: { label: "Surprise Me", emoji: "🎲" }
     };
-    
+
     const moodInfo = moodLabels[selectedMood] || moodLabels.surprise;
-    
-    return (
-      <LoadingRecommendation 
+
+    content = (
+      <LoadingRecommendation
         mood={moodInfo.label}
         moodEmoji={moodInfo.emoji}
-        userLocation={userLocation?.city && userLocation?.state ? `${userLocation.city}, ${userLocation.state}` : undefined}
+        userLocation={
+          userLocation?.city && userLocation?.state
+            ? `${userLocation.city}, ${userLocation.state}`
+            : undefined
+        }
+      />
+    );
+  } else {
+    content = (
+      <RecommendationCard
+        recommendation={recommendation!}
+        onAccept={handleAccept}
+        onReject={handleReject}
+        canReroll={!hasRerolled}
       />
     );
   }
 
   return (
-    <RecommendationCard
-      recommendation={recommendation!}
-      onAccept={handleAccept}
-      onReject={handleReject}
-      canReroll={!hasRerolled}
-    />
+    <>
+      {content}
+      <Feedback />
+    </>
   );
 };
 
