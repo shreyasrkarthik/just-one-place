@@ -8,7 +8,7 @@ interface LoadingRecommendationProps {
 
 export const LoadingRecommendation = ({ mood, moodImage, userLocation }: LoadingRecommendationProps) => {
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6">
       <div className="max-w-md w-full space-y-6">
         <div className="text-center space-y-2">
           <p className="text-lg text-muted-foreground flex items-center justify-center gap-2">
