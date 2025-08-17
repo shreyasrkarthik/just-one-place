@@ -2,11 +2,15 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
+import Stripe from 'stripe';
 // Load .env from the current directory
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+  apiVersion: '2024-06-20',
+});
 
 // Middleware
 app.use(cors({
@@ -81,6 +85,39 @@ app.post('/api/feedback', feedbackLimiter, async (req, res) => {
     res.status(500).json({ 
       error: 'Failed to send feedback. Please try again later.' 
     });
+  }
+});
+
+// Stripe checkout session endpoint
+app.post('/api/create-checkout-session', async (req, res) => {
+  try {
+    const { amount } = req.body;
+
+    if (!amount || ![100, 500, 2500].includes(amount)) {
+      return res.status(400).json({ error: 'Invalid amount' });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: { name: 'Buy me a coffee' },
+            unit_amount: amount,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/?success=true`,
+      cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/?canceled=true`,
+    });
+
+    res.json({ id: session.id });
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    res.status(500).json({ error: 'Failed to create checkout session' });
   }
 });
 

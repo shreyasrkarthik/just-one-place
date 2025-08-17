@@ -4,6 +4,7 @@ import { LocationRequest } from "@/components/LocationRequest";
 import { LoadingRecommendation } from "@/components/LoadingRecommendation";
 import { RecommendationCard } from "@/components/RecommendationCard";
 import Feedback from "@/components/Feedback";
+import BuyMeCoffee from "@/components/BuyMeCoffee";
 import { getCurrentLocation, UserLocation } from "@/utils/location";
 import { getLocationAwareRecommendation, LocationAwareRecommendation } from "@/utils/placesService";
 import { toast } from "@/hooks/use-toast";
@@ -166,6 +167,7 @@ const Index = () => {
     <>
       {content}
       <Feedback />
+      <BuyMeCoffee />
     </>
   );
 };
