@@ -46,7 +46,7 @@ export const LocationRequest = ({ onLocationGranted, onLocationDenied, mood, err
               Where are you?
             </h2>
             <p className="text-muted-foreground">
-              OneRec needs your location to find amazing places within 20 miles of you. 
+            VibePick needs your location to find amazing places within 20 miles of you. 
               No creepy tracking, just good recommendations.
             </p>
           </div>
@@ -85,7 +85,7 @@ export const LocationRequest = ({ onLocationGranted, onLocationDenied, mood, err
 
         <div className="text-center">
           <p className="text-xs text-muted-foreground">
-            OneRec finds places within 20 miles • No lists, just one perfect pick
+          VibePick finds places within 20 miles • No lists, just one perfect pick
           </p>
         </div>
       </div>
