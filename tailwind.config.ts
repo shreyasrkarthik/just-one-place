@@ -18,8 +18,8 @@ export default {
 				'2xl': '1400px'
 			}
 		},
-		extend: {
-			colors: {
+                extend: {
+                        colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
@@ -69,16 +69,19 @@ export default {
 				'gradient-mood': 'var(--gradient-mood)',
 				'gradient-card': 'var(--gradient-card)'
 			},
-			boxShadow: {
-				'mood': 'var(--shadow-mood)',
-				'card-custom': 'var(--shadow-card)',
-				'button-custom': 'var(--shadow-button)'
-			},
-			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
-			},
+                        boxShadow: {
+                                'mood': 'var(--shadow-mood)',
+                                'card-custom': 'var(--shadow-card)',
+                                'button-custom': 'var(--shadow-button)'
+                        },
+                        fontFamily: {
+                                heading: ['Poppins', 'sans-serif'],
+                        },
+                        borderRadius: {
+                                lg: 'var(--radius)',
+                                md: 'calc(var(--radius) - 2px)',
+                                sm: 'calc(var(--radius) - 4px)'
+                        },
 			keyframes: {
 				'accordion-down': {
 					from: {
