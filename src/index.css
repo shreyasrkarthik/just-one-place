@@ -121,3 +121,16 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes roll {
+  0% {
+    transform: translateX(-120%) rotate(0deg);
+  }
+  100% {
+    transform: translateX(120%) rotate(720deg);
+  }
+}
+
+.roll-dice {
+  animation: roll 1s ease-in-out forwards;
+}

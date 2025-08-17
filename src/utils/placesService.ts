@@ -106,7 +106,7 @@ export interface LocationAwareRecommendation {
   imageUrl: string;
   mapsUrl: string;
   mood: string;
-  moodEmoji: string;
+  moodImage: string;
   openHours: string;
   distance: string;
   userLocation: string;
@@ -172,17 +172,17 @@ export const getLocationAwareRecommendation = async (
     : `${selectedPlace.address}, ${locationText}`;
 
   // Get mood info
-  const moodLabels: Record<string, { label: string; emoji: string }> = {
-    restless: { label: "Restless", emoji: "😵" },
-    sad: { label: "Sad", emoji: "😔" },
-    romantic: { label: "Romantic", emoji: "❤️" },
-    anxious: { label: "Anxious", emoji: "🤯" },
-    celebratory: { label: "Celebratory", emoji: "🎉" },
-    bored: { label: "Bored", emoji: "😴" },
-    energetic: { label: "Energetic", emoji: "⚡" },
-    adventurous: { label: "Adventurous", emoji: "🗺️" },
-    nostalgic: { label: "Nostalgic", emoji: "🕰️" },
-    surprise: { label: "Surprise Me", emoji: "🎲" }
+  const moodLabels: Record<string, { label: string; image: string }> = {
+    restless: { label: "Restless", image: "/vibes/restless.png" },
+    sad: { label: "Sad", image: "/vibes/sad.png" },
+    romantic: { label: "Romantic", image: "/vibes/romantic.png" },
+    anxious: { label: "Anxious", image: "/vibes/anxious.png" },
+    celebratory: { label: "Celebratory", image: "/vibes/celebratory.png" },
+    bored: { label: "Bored", image: "/vibes/bored.png" },
+    energetic: { label: "Energetic", image: "/vibes/energetic.png" },
+    adventurous: { label: "Adventurous", image: "/vibes/adventorous.png" },
+    nostalgic: { label: "Nostalgic", image: "/vibes/nostalgic.png" },
+    surprise: { label: "Surprise Me", image: "/vibes/surprise.png" }
   };
 
   const moodInfo = moodLabels[mood] || moodLabels.surprise;
@@ -192,10 +192,10 @@ export const getLocationAwareRecommendation = async (
     name: selectedPlace.name,
     address: fullAddress,
     reason: reasons[reasonIndex],
-    imageUrl: "/lovable-uploads/490baa65-3ec1-4eea-83ad-b1f38758491d.png",
+    imageUrl: moodInfo.image,
     mapsUrl: `https://maps.apple.com/?q=${encodeURIComponent(selectedPlace.name + " " + fullAddress)}`,
     mood: moodInfo.label,
-    moodEmoji: moodInfo.emoji,
+    moodImage: moodInfo.image,
     openHours: selectedPlace.openHours || "Check hours online",
     distance: distanceText,
     userLocation: locationText
