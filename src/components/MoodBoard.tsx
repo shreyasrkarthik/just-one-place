@@ -1,6 +1,7 @@
 import { useState, useRef, type CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 import confetti from "canvas-confetti";
+import { trackEvent } from "@/lib/analytics";
 
 interface Mood {
   id: string;
@@ -110,12 +111,14 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
     setTimeout(() => {
       mascotRef.current?.classList.remove("animate-bounce");
       setAnimating(null);
+      trackEvent("mood_selected", { mood: mood.id });
       onMoodSelect(mood.id);
     }, 600);
   };
 
   const handleSurprise = () => {
     if (rolling) return;
+    trackEvent("surprise_me_clicked");
     setGuideText("Rolling the dice...");
     const finalMood = moods[Math.floor(Math.random() * moods.length)];
     const items = Array.from({ length: 8 }, () => moods[Math.floor(Math.random() * moods.length)].label);
@@ -129,6 +132,7 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
       setSlotAnimating(false);
       setRolling(false);
       setSlotItems(["Surprise Me"]);
+      trackEvent("pageview");
       handleMoodClick(finalMood);
     }, 1000);
   };
@@ -229,6 +233,7 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
               href={todayPick.link}
               target="_blank"
               className="block bg-gradient-card p-4 rounded-lg shadow-card-custom hover:shadow-lg transition-shadow"
+              onClick={() => trackEvent("daily_pick_clicked")}
             >
               <p className="text-sm text-muted-foreground">{todayPick.text}</p>
             </a>

@@ -58,6 +58,29 @@ export const getCurrentLocation = (): Promise<UserLocation> => {
   });
 };
 
+export const getLocationFromZip = async (zip: string): Promise<UserLocation> => {
+  let country = "us";
+  let code = zip.trim();
+  const parts = code.split(/\s+/);
+  if (parts.length > 1 && /^[a-zA-Z]{2,}$/i.test(parts[0])) {
+    country = parts[0].toLowerCase();
+    code = parts.slice(1).join(" ");
+  }
+
+  const response = await fetch(`https://api.zippopotam.us/${country}/${encodeURIComponent(code)}`);
+  if (!response.ok) {
+    throw new Error("Invalid ZIP code");
+  }
+  const data = await response.json();
+  const place = data.places[0];
+  return {
+    latitude: parseFloat(place.latitude),
+    longitude: parseFloat(place.longitude),
+    city: place["place name"],
+    state: place["state abbreviation"] || place.state
+  };
+};
+
 export const getDistanceInMiles = (
   lat1: number,
   lon1: number,

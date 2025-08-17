@@ -6,6 +6,7 @@ import { RecommendationCard } from "@/components/RecommendationCard";
 import Feedback from "@/components/Feedback";
 import BuyMeCoffee from "@/components/BuyMeCoffee";
 import { getCurrentLocation, UserLocation } from "@/utils/location";
+import { getCurrentLocation, getLocationFromZip, UserLocation } from "@/utils/location";
 import { getLocationAwareRecommendation, LocationAwareRecommendation } from "@/utils/placesService";
 import { toast } from "@/hooks/use-toast";
 
@@ -56,28 +57,33 @@ const Index = () => {
     }
   };
 
-  const handleLocationDenied = () => {
-    // For now, we'll use a default location (Austin, TX) when denied
-    const defaultLocation: UserLocation = {
-      latitude: 30.2672,
-      longitude: -97.7431,
-      city: "Austin",
-      state: "TX"
-    };
-    
-    setUserLocation(defaultLocation);
+  const handleZipSubmit = async (zip: string) => {
     setState("loading");
-    
-    setTimeout(async () => {
-      const rec = await getLocationAwareRecommendation(selectedMood, defaultLocation);
-      setRecommendation(rec);
-      setState("recommendation");
-      
+    setLocationError("");
+
+    try {
+      const location = await getLocationFromZip(zip);
+      setUserLocation(location);
+
+      setTimeout(async () => {
+        const rec = await getLocationAwareRecommendation(selectedMood, location);
+        setRecommendation(rec);
+        setState("recommendation");
+
+        toast({
+          title: "Perfect! 🎯",
+          description: `Found a great ${selectedMood} spot near you!`,
+        });
+      }, 2000);
+    } catch (error) {
+      setLocationError(error instanceof Error ? error.message : "Failed to get location");
+      setState("location-request");
       toast({
-        title: "Using default location",
-        description: "Showing recommendations for Austin, TX area",
+        title: "Location Error",
+        description: "Couldn't get your location. Try again or enter your ZIP.",
+        variant: "destructive"
       });
-    }, 1500);
+    }
   };
 
   const handleAccept = () => {
@@ -120,7 +126,7 @@ const Index = () => {
     content = (
       <LocationRequest
         onLocationGranted={handleLocationGranted}
-        onLocationDenied={handleLocationDenied}
+        onZipSubmit={handleZipSubmit}
         mood={selectedMood}
         error={locationError}
       />
