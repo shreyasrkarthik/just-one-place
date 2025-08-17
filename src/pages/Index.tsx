@@ -124,17 +124,17 @@ const Index = () => {
       />
     );
   } else if (state === "loading") {
-    const moodLabels: Record<string, { label: string; emoji: string }> = {
-      restless: { label: "Restless", emoji: "😵" },
-      sad: { label: "Sad", emoji: "😔" },
-      romantic: { label: "Romantic", emoji: "❤️" },
-      anxious: { label: "Anxious", emoji: "🤯" },
-      celebratory: { label: "Celebratory", emoji: "🎉" },
-      bored: { label: "Bored", emoji: "😴" },
-      energetic: { label: "Energetic", emoji: "⚡" },
-      adventurous: { label: "Adventurous", emoji: "🗺️" },
-      nostalgic: { label: "Nostalgic", emoji: "🕰️" },
-      surprise: { label: "Surprise Me", emoji: "🎲" }
+    const moodLabels: Record<string, { label: string; image: string }> = {
+      restless: { label: "Restless", image: "/vibes/restless.png" },
+      sad: { label: "Sad", image: "/vibes/sad.png" },
+      romantic: { label: "Romantic", image: "/vibes/romantic.png" },
+      anxious: { label: "Anxious", image: "/vibes/anxious.png" },
+      celebratory: { label: "Celebratory", image: "/vibes/celebratory.png" },
+      bored: { label: "Bored", image: "/vibes/bored.png" },
+      energetic: { label: "Energetic", image: "/vibes/energetic.png" },
+      adventurous: { label: "Adventurous", image: "/vibes/adventorous.png" },
+      nostalgic: { label: "Nostalgic", image: "/vibes/nostalgic.png" },
+      surprise: { label: "Surprise Me", image: "/vibes/surprise.png" }
     };
 
     const moodInfo = moodLabels[selectedMood] || moodLabels.surprise;
@@ -142,7 +142,7 @@ const Index = () => {
     content = (
       <LoadingRecommendation
         mood={moodInfo.label}
-        moodEmoji={moodInfo.emoji}
+        moodImage={moodInfo.image}
         userLocation={
           userLocation?.city && userLocation?.state
             ? `${userLocation.city}, ${userLocation.state}`

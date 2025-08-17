@@ -1,19 +1,18 @@
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 interface LoadingRecommendationProps {
   mood: string;
-  moodEmoji: string;
+  moodImage: string;
   userLocation?: string;
 }
 
-export const LoadingRecommendation = ({ mood, moodEmoji, userLocation }: LoadingRecommendationProps) => {
+export const LoadingRecommendation = ({ mood, moodImage, userLocation }: LoadingRecommendationProps) => {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
       <div className="max-w-md w-full space-y-6">
         <div className="text-center space-y-2">
-          <p className="text-lg text-muted-foreground">
-            Your Mood: {moodEmoji} {mood}
+          <p className="text-lg text-muted-foreground flex items-center justify-center gap-2">
+            <img src={moodImage} alt="mood" className="h-6 w-6" /> {mood}
           </p>
           {userLocation && (
             <p className="text-sm text-muted-foreground">
