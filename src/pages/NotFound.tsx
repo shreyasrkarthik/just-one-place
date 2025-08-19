@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 
 export const NotFound = () => {
   useEffect(() => {
-    document.title = "Page Not Found - Just One Place";
+    document.title = "Page Not Found - VibePick";
   }, []);
 
   return (
@@ -28,7 +28,7 @@ export const NotFound = () => {
 
           <Button asChild variant="action" className="w-full">
             <Link to="/">
-              Return to Just One Place
+              Return to VibePick
             </Link>
           </Button>
         </Card>

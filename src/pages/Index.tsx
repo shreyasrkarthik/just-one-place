@@ -17,8 +17,8 @@ export const Index = () => {
 
   // Clear any existing state on component mount
   useEffect(() => {
-    localStorage.removeItem("just-one-place-state");
-    sessionStorage.removeItem("just-one-place-state");
+    localStorage.removeItem("vibepick-state");
+    sessionStorage.removeItem("vibepick-state");
   }, []);
 
   const handleMoodSelect = (mood: string) => {

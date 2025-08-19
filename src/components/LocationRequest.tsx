@@ -67,7 +67,7 @@ export const LocationRequest = ({ onLocationGranted, onZipSubmit, mood, error }:
               Where are you?
             </h2>
             <p className="text-muted-foreground">
-              Just One Place needs your location to find amazing places within 20 miles of you for your <span className="font-semibold text-foreground">{mood}</span> mood. 
+              VibePick needs your location to find amazing places within 20 miles of you for your <span className="font-semibold text-foreground">{mood}</span> mood. 
               No creepy tracking, just good recommendations.
             </p>
           </div>
@@ -161,7 +161,7 @@ export const LocationRequest = ({ onLocationGranted, onZipSubmit, mood, error }:
 
         <div className="text-center space-y-2">
           <p className="text-xs text-muted-foreground">
-          Just One Place finds places within 20 miles • No lists, just one perfect pick
+                     VibePick finds places within 20 miles • No lists, just one perfect pick
           </p>
           
           {/* API Information */}

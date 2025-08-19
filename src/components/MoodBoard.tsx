@@ -104,7 +104,7 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
 
   const todayPick = {
     text: "Random fact: The average person makes 35,000 decisions per day. Let us make this one for you! 🎯",
-    link: "https://just-one-place.vercel.app"
+    link: "https://vibepick.vercel.app"
   };
 
   const handleMoodClick = (mood: Mood) => {
@@ -158,7 +158,7 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
           <div className="flex items-center justify-between">
             <div></div> {/* Empty div for spacing */}
             <h1 className="font-heading text-5xl font-extrabold tracking-tight text-foreground">
-              Just One Place
+              VibePick
             </h1>
             <div></div> {/* Empty div for spacing */}
           </div>

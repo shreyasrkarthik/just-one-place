@@ -1,6 +1,6 @@
-# Just One Place - Location-Based Recommendations
+# VibePick - One Perfect Recommendation
 
-A smart location-based recommendation app that finds the perfect place based on your mood and location.
+Stop scrolling through endless options. VibePick gives you exactly one perfect recommendation based on your mood and location.
 
 ## ✨ Features
 
@@ -21,7 +21,7 @@ A smart location-based recommendation app that finds the perfect place based on 
 ```bash
 # Clone the repository
 git clone <YOUR_REPO_URL>
-cd just-one-place
+cd vibepick
 
 # Install dependencies
 npm install
@@ -135,4 +135,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Ready to find your perfect place?** Get started with a free OpenCage API key and enjoy comprehensive ZIP code coverage! 🎉
+**Ready to stop endless scrolling?** Get started with a free OpenCage API key and enjoy VibePick's perfect recommendations! 🎉

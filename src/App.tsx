@@ -17,12 +17,12 @@ function App() {
   }, []);
 
   useEffect(() => {
-    let title = "Just One Place - Smart Location Recommendations";
+    let title = "VibePick - One Perfect Recommendation";
     
     if (currentPath === "/") {
-      title = "Just One Place - Smart Location Recommendations";
+      title = "VibePick - One Perfect Recommendation";
     } else {
-      title = "Page Not Found - Just One Place";
+      title = "Page Not Found - VibePick";
     }
     
     document.title = title;
