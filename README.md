@@ -4,6 +4,22 @@
 
 **URL**: https://lovable.dev/projects/45566cc9-20a2-4405-aac4-f2ce9ead2f36
 
+## ✨ New Features: ZIP Code to Location API
+
+This project now includes **comprehensive ZIP code to location conversion** using the OpenCage Geocoding API:
+
+- 🗺️ **All US ZIP codes supported** (42,000+ codes)
+- 🎯 **Real coordinates** instead of mock data
+- 🚀 **Free tier**: 2,500 requests/day
+- 🔄 **Automatic fallback** to mock data when API unavailable
+
+### Quick Setup
+1. Get a free API key at [opencagedata.com](https://opencagedata.com/users/sign_up)
+2. Create `.env` file: `VITE_OPENCAGE_API_KEY=your_key_here`
+3. Restart dev server
+
+📖 **Full setup guide**: [ZIPCODE_API_SETUP.md](./ZIPCODE_API_SETUP.md)
+
 ## How can I edit this code?
 
 There are several ways of editing your application.

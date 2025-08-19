@@ -117,8 +117,21 @@ export const getLocationAwareRecommendation = async (
   userLocation: UserLocation,
   reroll: boolean = false
 ): Promise<LocationAwareRecommendation> => {
+  console.log('🎯 Getting location-aware recommendation:', {
+    mood,
+    userLocation: {
+      coordinates: `${userLocation.latitude}, ${userLocation.longitude}`,
+      city: userLocation.city,
+      state: userLocation.state,
+      zipCode: userLocation.zipCode
+    },
+    reroll
+  });
+
   const categories = moodToCategories[mood] || moodToCategories.surprise;
   const reasons = wittyReasons[mood] || wittyReasons.surprise;
+  
+  console.log(`🎭 Mood categories for "${mood}":`, categories);
   
   // Filter places by category and distance (20 mile limit)
   let relevantPlaces = samplePlaces.filter(place => {
@@ -131,24 +144,37 @@ export const getLocationAwareRecommendation = async (
           place.latitude,
           place.longitude
         );
-        return distance <= 20;
+        const isWithinRange = distance <= 20;
+        
+        if (isWithinRange) {
+          console.log(`📍 Place "${place.name}" is within range: ${distance.toFixed(1)} miles`);
+        }
+        
+        return isWithinRange;
       }
       // For generic places, include them
+      console.log(`🌍 Generic place "${place.name}" included (no coordinates)`);
       return true;
     }
     return false;
   });
 
+  console.log(`🔍 Found ${relevantPlaces.length} relevant places within 20 miles`);
+
   // If no relevant places found, use surprise category
   if (relevantPlaces.length === 0) {
+    console.log('⚠️ No relevant places found, using surprise category');
     relevantPlaces = samplePlaces.filter(place => 
       moodToCategories.surprise.includes(place.category)
     );
+    console.log(`🎲 Surprise places found: ${relevantPlaces.length}`);
   }
 
   // Select place based on reroll
   const placeIndex = reroll ? Math.min(1, relevantPlaces.length - 1) : 0;
   const selectedPlace = relevantPlaces[placeIndex] || relevantPlaces[0];
+  
+  console.log(`🎯 Selected place: "${selectedPlace.name}" (${selectedPlace.category})`);
   
   // Calculate distance for display
   let distanceText = "Nearby";
@@ -160,6 +186,7 @@ export const getLocationAwareRecommendation = async (
       selectedPlace.longitude
     );
     distanceText = `${distance.toFixed(1)} miles away`;
+    console.log(`📏 Distance calculation: ${distanceText}`);
   }
 
   // Generate location-aware address
@@ -170,6 +197,8 @@ export const getLocationAwareRecommendation = async (
   const fullAddress = selectedPlace.latitude !== 0 
     ? selectedPlace.address 
     : `${selectedPlace.address}, ${locationText}`;
+
+  console.log(`📍 Final address: ${fullAddress}`);
 
   // Get mood info
   const moodLabels: Record<string, { label: string; image: string }> = {
@@ -188,7 +217,7 @@ export const getLocationAwareRecommendation = async (
   const moodInfo = moodLabels[mood] || moodLabels.surprise;
   const reasonIndex = reroll ? Math.min(1, reasons.length - 1) : 0;
   
-  return {
+  const recommendation: LocationAwareRecommendation = {
     name: selectedPlace.name,
     address: fullAddress,
     reason: reasons[reasonIndex],
@@ -200,4 +229,14 @@ export const getLocationAwareRecommendation = async (
     distance: distanceText,
     userLocation: locationText
   };
+
+  console.log('🎉 Final recommendation generated:', {
+    place: recommendation.name,
+    address: recommendation.address,
+    distance: recommendation.distance,
+    userLocation: recommendation.userLocation,
+    mood: recommendation.mood
+  });
+  
+  return recommendation;
 };
