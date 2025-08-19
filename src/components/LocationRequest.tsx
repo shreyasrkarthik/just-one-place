@@ -2,7 +2,8 @@ import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { MapPin, Clock, AlertCircle } from "lucide-react";
+import { MapPin, Clock, AlertCircle, Info, CheckCircle } from "lucide-react";
+import { isUsingMockData } from "@/config/api";
 
 interface LocationRequestProps {
   onLocationGranted: () => void;
@@ -14,6 +15,7 @@ interface LocationRequestProps {
 export const LocationRequest = ({ onLocationGranted, onZipSubmit, mood, error }: LocationRequestProps) => {
   const [showZipInput, setShowZipInput] = useState(false);
   const [zip, setZip] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRequestLocation = () => {
     navigator.geolocation.getCurrentPosition(
@@ -23,10 +25,15 @@ export const LocationRequest = ({ onLocationGranted, onZipSubmit, mood, error }:
     );
   };
 
-  const handleZipSubmit = (e: FormEvent) => {
+  const handleZipSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (zip.trim()) {
-      onZipSubmit(zip.trim());
+    if (zip.trim() && !isSubmitting) {
+      setIsSubmitting(true);
+      try {
+        await onZipSubmit(zip.trim());
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -42,6 +49,8 @@ export const LocationRequest = ({ onLocationGranted, onZipSubmit, mood, error }:
     nostalgic: "Nostalgic? Let's take a trip down memory lane.",
   };
   const guideText = guideMessages[mood] ?? "Ready for an adventure?";
+
+  const usingMockData = isUsingMockData();
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6">
@@ -62,6 +71,27 @@ export const LocationRequest = ({ onLocationGranted, onZipSubmit, mood, error }:
               No creepy tracking, just good recommendations.
             </p>
           </div>
+
+          {/* API Status Indicator */}
+          {usingMockData && (
+            <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg text-blue-700 dark:text-blue-300">
+              <Info className="w-4 h-4" />
+              <div className="text-left">
+                <p className="text-sm font-medium">Development Mode</p>
+                <p className="text-xs">Using mock data for testing. Limited ZIP code coverage.</p>
+              </div>
+            </div>
+          )}
+
+          {!usingMockData && (
+            <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg text-green-700 dark:text-green-300">
+              <CheckCircle className="w-4 h-4" />
+              <div className="text-left">
+                <p className="text-sm font-medium">Full ZIP Code Coverage</p>
+                <p className="text-xs">All US ZIP codes supported via OpenCage API</p>
+              </div>
+            </div>
+          )}
 
           {error && (
             <div className="flex items-center gap-2 p-3 bg-destructive/10 rounded-lg text-destructive">
@@ -89,16 +119,36 @@ export const LocationRequest = ({ onLocationGranted, onZipSubmit, mood, error }:
             </Button>
 
             {showZipInput && (
-              <form onSubmit={handleZipSubmit} className="flex gap-2 pt-2">
-                <Input
-                  value={zip}
-                  onChange={(e) => setZip(e.target.value)}
-                  placeholder="Enter ZIP code"
-                  className="flex-1"
-                />
-                <Button type="submit" variant="action">
-                  Go
-                </Button>
+              <form onSubmit={handleZipSubmit} className="space-y-3 pt-2">
+                <div className="flex gap-2">
+                  <Input
+                    value={zip}
+                    onChange={(e) => setZip(e.target.value)}
+                    placeholder="Enter ZIP code (e.g., 10001)"
+                    className="flex-1"
+                    maxLength={10}
+                    pattern="^\d{5}(-\d{4})?$"
+                  />
+                  <Button 
+                    type="submit" 
+                    variant="action"
+                    disabled={isSubmitting || !zip.trim()}
+                  >
+                    {isSubmitting ? "..." : "Go"}
+                  </Button>
+                </div>
+                
+                {/* ZIP Code Help Text */}
+                <div className="text-xs text-muted-foreground text-left">
+                  <p>• Enter a 5-digit US ZIP code</p>
+                  <p>• Format: 10001 or 10001-1234</p>
+                  {usingMockData && (
+                    <p>• Limited coverage in development mode</p>
+                  )}
+                  {!usingMockData && (
+                    <p>• All US ZIP codes supported</p>
+                  )}
+                </div>
               </form>
             )}
           </div>
@@ -109,10 +159,18 @@ export const LocationRequest = ({ onLocationGranted, onZipSubmit, mood, error }:
           </div>
         </Card>
 
-        <div className="text-center">
+        <div className="text-center space-y-2">
           <p className="text-xs text-muted-foreground">
           VibePick finds places within 20 miles • No lists, just one perfect pick
           </p>
+          
+          {/* API Information */}
+          {usingMockData && (
+            <div className="text-xs text-muted-foreground">
+              <p>💡 Want full ZIP code coverage?</p>
+              <p>Get a free API key at <a href="https://opencagedata.com/users/sign_up" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">opencagedata.com</a></p>
+            </div>
+          )}
         </div>
       </div>
     </div>
