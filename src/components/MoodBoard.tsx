@@ -102,52 +102,54 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
     nostalgic: "Nostalgic? Let's take a trip down memory lane.",
   };
 
+  const todayPick = {
+    text: "Random fact: The average person makes 35,000 decisions per day. Let us make this one for you! 🎯",
+    link: "https://just-one-place.vercel.app"
+  };
+
   const handleMoodClick = (mood: Mood) => {
-    setGuideText(`Woohoo! ${mood.label}!`);
-    mascotRef.current?.classList.add("animate-bounce");
-    confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 }, colors: [mood.color] });
     setAnimating(mood.id);
+    
+    // Trigger confetti for celebratory mood
+    if (mood.id === 'celebratory') {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    }
+    
+    // Animate the button
     setTimeout(() => {
-      mascotRef.current?.classList.remove("animate-bounce");
       setAnimating(null);
       onMoodSelect(mood.id);
-    }, 600);
+    }, 500);
   };
 
   const handleSurprise = () => {
     if (rolling) return;
-    setGuideText("Rolling the dice...");
-    const finalMood = moods[Math.floor(Math.random() * moods.length)];
-    const items = Array.from({ length: 8 }, () => moods[Math.floor(Math.random() * moods.length)].label);
-    items.push(finalMood.label);
-    setSlotItems(items);
+    
     setRolling(true);
-    requestAnimationFrame(() => setSlotAnimating(true));
-    diceRef.current?.classList.add("roll-dice");
+    setSlotAnimating(true);
+    
+    // Random mood selection
+    const randomMood = moods[Math.floor(Math.random() * moods.length)];
+    
     setTimeout(() => {
-      diceRef.current?.classList.remove("roll-dice");
       setSlotAnimating(false);
       setRolling(false);
-      setSlotItems(["Surprise Me"]);
-      handleMoodClick(finalMood);
-    }, 1000);
+      onMoodSelect(randomMood.id);
+    }, 2000);
   };
-
-  const wildPicks = [
-    { text: "Feeling nostalgic? Here's a retro arcade near you.", link: "https://example.com/blog/retro-arcade" },
-    { text: "Craving chaos? Try indoor skydiving.", link: "https://example.com/blog/indoor-skydiving" },
-    { text: "Need sugar? There's a donut truck around the corner.", link: "https://example.com/blog/donut-truck" },
-  ];
-  const todayPick = wildPicks[new Date().getDate() % wildPicks.length];
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6">
-      <div className="max-w-lg w-full space-y-8">
+      <div className="max-w-2xl w-full space-y-8">
         <header className="text-center space-y-4">
           <div className="flex items-center justify-between">
             <div></div> {/* Empty div for spacing */}
             <h1 className="font-heading text-5xl font-extrabold tracking-tight text-foreground">
-              Vibe Pick
+              Just One Place
             </h1>
             <div></div> {/* Empty div for spacing */}
           </div>
@@ -156,7 +158,7 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
         <div className="text-center space-y-2">
           <h2 className="font-heading text-4xl font-bold text-foreground">What's your vibe? 👇</h2>
           <p className="text-muted-foreground text-lg">
-            We'll boss you around and send you somewhere cool 😎. Don't overthink it.
+            We'll find you the perfect place based on your mood 😎. Don't overthink it.
           </p>
           <div className="flex items-center justify-center gap-2 text-muted-foreground">
             <img ref={mascotRef} src="/mascot.svg" alt="mascot" className="h-10 w-10" />

@@ -192,13 +192,22 @@ export const getLocationAwareRecommendation = async (
   // Generate location-aware address
   const locationText = userLocation.city && userLocation.state 
     ? `${userLocation.city}, ${userLocation.state}`
-    : "your area";
+    : userLocation.zipCode 
+      ? `ZIP ${userLocation.zipCode}`
+      : "your area";
     
   const fullAddress = selectedPlace.latitude !== 0 
     ? selectedPlace.address 
     : `${selectedPlace.address}, ${locationText}`;
 
   console.log(`📍 Final address: ${fullAddress}`);
+  console.log(`📍 Location text: ${locationText}`);
+  console.log(`📍 User location data:`, {
+    city: userLocation.city,
+    state: userLocation.state,
+    zipCode: userLocation.zipCode,
+    coordinates: `${userLocation.latitude}, ${userLocation.longitude}`
+  });
 
   // Get mood info
   const moodLabels: Record<string, { label: string; image: string }> = {

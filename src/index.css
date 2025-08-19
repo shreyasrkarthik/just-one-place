@@ -9,107 +9,48 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* VibePick Brand Colors - Playful & Vibrant */
-    --background: 25 100% 97%;
-    --foreground: 240 10% 3.9%;
-
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-
+    --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-
-    --primary: 269 100% 62%;
-    --primary-foreground: 0 0% 98%;
-
-    --secondary: 47 100% 88%;
-    --secondary-foreground: 240 5.9% 10%;
-
-    --muted: 47 100% 95%;
-    --muted-foreground: 240 3.8% 46.1%;
-
-    --accent: 12 100% 85%;
-    --accent-foreground: 240 5.9% 10%;
-
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 47 100% 92%;
-    --input: 47 100% 92%;
-    --ring: 269 100% 62%;
-
-    /* Custom VibePick tokens */
-    --gradient-hero: linear-gradient(135deg, hsl(269 100% 62%), hsl(330 100% 70%));
-    --gradient-mood: linear-gradient(135deg, hsl(350 100% 85%), hsl(45 100% 85%));
-    --gradient-card: linear-gradient(135deg, hsl(350 100% 95%), hsl(45 100% 95%));
-    
-    --shadow-mood: 0 4px 20px -2px hsl(350 100% 85% / 0.3);
-    --shadow-card: 0 8px 30px -4px hsl(240 10% 3.9% / 0.1);
-    --shadow-button: 0 4px 15px -2px hsl(269 100% 62% / 0.4);
-
-    --radius: 1.25rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-
-    --card: 240 6% 10%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 240 6% 10%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 269 100% 65%;
-    --primary-foreground: 0 0% 98%;
-
-    --secondary: 240 4% 16%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 240 6% 10%;
-    --muted-foreground: 240 5% 64.9%;
-
-    --accent: 240 4% 16%;
-    --accent-foreground: 0 0% 98%;
-
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 6% 20%;
-    --input: 240 6% 20%;
-    --ring: 269 100% 65%;
-
-    --gradient-hero: linear-gradient(135deg, hsl(269 100% 65%), hsl(330 100% 70%));
-    --gradient-mood: linear-gradient(135deg, hsl(350 100% 85%), hsl(45 100% 85%));
-    --gradient-card: linear-gradient(135deg, hsl(350 100% 95%), hsl(45 100% 95%));
-    
-    --shadow-mood: 0 4px 20px -2px hsl(350 100% 85% / 0.3);
-    --shadow-card: 0 8px 30px -4px hsl(0 0% 0% / 0.5);
-    --shadow-button: 0 4px 15px -2px hsl(269 100% 65% / 0.5);
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 94.1%;
   }
 }
 
@@ -117,16 +58,8 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
   body {
-    @apply text-foreground;
-    background: linear-gradient(120deg, hsl(var(--background)), hsl(var(--accent)), hsl(var(--secondary)));
-    background-size: 400% 400%;
-    animation: backgroundShift 30s ease infinite;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Poppins', sans-serif;
+    @apply bg-background text-foreground;
   }
 }
 
@@ -262,4 +195,111 @@ All colors MUST be HSL.
 /* Font family */
 .font-heading {
   font-family: 'Poppins', sans-serif;
+}
+
+/* Just One Place Brand Colors - Playful & Vibrant */
+@layer components {
+  .bg-gradient-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+    backdrop-filter: blur(10px);
+  }
+
+  .shadow-card-custom {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .bg-gradient-to-br {
+    background: linear-gradient(to bottom right, #fdf2f8, #f3e8ff, #e0e7ff);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .btn-action {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+  }
+
+  .btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-action:active {
+    transform: translateY(0);
+  }
+
+  .mood-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .mood-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+  }
+
+  .mood-item:hover {
+    transform: translateY(-4px);
+    border-color: #667eea;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  }
+
+  .mood-item.selected {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  }
+
+  .mood-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 0.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .mood-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-align: center;
+    color: #374151;
+  }
+
+  /* Custom Just One Place tokens */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-bounce-slow {
+    animation: bounce 2s infinite;
+  }
 }
