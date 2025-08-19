@@ -131,14 +131,23 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
     
     setRolling(true);
     setSlotAnimating(true);
+    setGuideText("Rolling the dice...");
     
-    // Random mood selection
-    const randomMood = moods[Math.floor(Math.random() * moods.length)];
+    // Generate random mood list for slot machine effect
+    const finalMood = moods[Math.floor(Math.random() * moods.length)];
+    const items = Array.from({ length: 8 }, () => moods[Math.floor(Math.random() * moods.length)].label);
+    items.push(finalMood.label);
+    setSlotItems(items);
+    
+    // Animate dice
+    diceRef.current?.classList.add("roll-dice");
     
     setTimeout(() => {
+      diceRef.current?.classList.remove("roll-dice");
       setSlotAnimating(false);
       setRolling(false);
-      onMoodSelect(randomMood.id);
+      setSlotItems(["Surprise Me"]);
+      onMoodSelect(finalMood.id);
     }, 2000);
   };
 

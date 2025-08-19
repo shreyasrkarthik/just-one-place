@@ -59,7 +59,14 @@ All colors MUST be HSL.
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: linear-gradient(120deg, #fdf2f8, #f3e8ff, #e0e7ff);
+    background-size: 400% 400%;
+    animation: backgroundShift 30s ease infinite;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
   }
 }
 
@@ -154,7 +161,8 @@ All colors MUST be HSL.
 }
 
 .bg-gradient-card {
-  background: linear-gradient(135deg, #ffe5e5 0%, #fff0e5 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+  backdrop-filter: blur(10px);
 }
 
 .shadow-button-custom {
@@ -166,15 +174,30 @@ All colors MUST be HSL.
 }
 
 .shadow-card-custom {
-  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Mood button variants */
+.btn-mood {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
+  backdrop-filter: blur(10px);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-mood:hover {
+  transform: translateY(-4px);
+  border-color: #667eea;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-mood:active {
+  transform: scale(0.95);
 }
 
 /* Mood board animations */
-.roll-dice {
-  animation: roll 1s ease-in-out;
-}
-
-@keyframes roll {
+@keyframes rotate {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }

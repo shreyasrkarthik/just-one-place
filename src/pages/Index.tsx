@@ -6,6 +6,7 @@ import { LoadingRecommendation } from "@/components/LoadingRecommendation";
 import { BuyMeCoffee } from "@/components/BuyMeCoffee";
 import { getCurrentLocation, getLocationFromZip, type UserLocation } from "@/utils/location";
 import { getLocationAwareRecommendation, type LocationAwareRecommendation } from "@/utils/placesService";
+import { Button } from "@/components/ui/button";
 
 export const Index = () => {
   const [currentStep, setCurrentStep] = useState<"mood" | "location" | "loading" | "recommendation">("mood");
@@ -23,7 +24,9 @@ export const Index = () => {
   const handleMoodSelect = (mood: string) => {
     console.log('🎭 Mood selected:', mood);
     setUserMood(mood);
+    console.log('✅ User mood set to:', mood);
     setCurrentStep("location");
+    console.log('🔄 Moving to location step');
   };
 
   const handleLocationGranted = () => {
@@ -51,17 +54,31 @@ export const Index = () => {
 
   const handleZipSubmit = async (zip: string) => {
     try {
+      console.log('🔍 ZIP code submitted:', zip);
+      console.log('🎭 Current mood:', userMood);
+      
+      if (!userMood) {
+        console.error('❌ No mood selected when submitting ZIP code');
+        setError("Please select a mood first");
+        return;
+      }
+      
       setError("");
       setCurrentStep("loading");
       
+      console.log('📍 Getting location from ZIP code...');
       const location = await getLocationFromZip(zip);
+      console.log('📍 Location obtained:', location);
       setUserLocation(location);
       
+      console.log('🎯 Getting recommendation for mood:', userMood, 'and location:', location);
       // Get recommendation immediately after ZIP location is obtained
       const rec = await getLocationAwareRecommendation(userMood, location);
+      console.log('🎉 Recommendation received:', rec);
       setRecommendation(rec);
       setCurrentStep("recommendation");
     } catch (error) {
+      console.error('❌ Error in handleZipSubmit:', error);
       setError(error instanceof Error ? error.message : "Failed to get location from ZIP code");
       setCurrentStep("location");
     }
@@ -109,11 +126,26 @@ export const Index = () => {
           />
         );
       case "loading":
-        return <LoadingRecommendation />;
+        return <LoadingRecommendation mood={userMood} />;
       case "recommendation":
+        if (!recommendation) {
+          console.error('❌ No recommendation available, falling back to mood selection');
+          return (
+            <div className="min-h-screen flex flex-col items-center justify-center p-6">
+              <div className="max-w-md w-full space-y-6 text-center">
+                <h2 className="text-2xl font-bold">Something went wrong</h2>
+                <p className="text-muted-foreground">No recommendation was generated. Let's try again.</p>
+                <Button onClick={handleStartOver} variant="action">
+                  Start Over
+                </Button>
+              </div>
+            </div>
+          );
+        }
+        console.log('🎯 Rendering recommendation:', recommendation);
         return (
           <RecommendationCard
-            recommendation={recommendation!}
+            recommendation={recommendation}
             onReroll={handleReroll}
             onStartOver={handleStartOver}
           />
@@ -124,7 +156,7 @@ export const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
+    <div className="min-h-screen">
       {renderCurrentStep()}
       <BuyMeCoffee />
     </div>
