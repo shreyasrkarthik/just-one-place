@@ -15,16 +15,14 @@ interface Recommendation {
 
 interface RecommendationCardProps {
   recommendation: Recommendation;
-  onAccept: () => void;
-  onReject: () => void;
-  canReroll: boolean;
+  onReroll: () => void;
+  onStartOver: () => void;
 }
 
 export const RecommendationCard = ({ 
   recommendation, 
-  onAccept, 
-  onReject, 
-  canReroll 
+  onReroll, 
+  onStartOver
 }: RecommendationCardProps) => {
   const handleMapClick = () => {
     window.open(recommendation.mapsUrl, '_blank');
@@ -70,32 +68,25 @@ export const RecommendationCard = ({
               <Button 
                 variant="action" 
                 className="flex-1"
-                onClick={onAccept}
+                onClick={onReroll}
               >
-                I'll Go
+                Try Another Place
               </Button>
               <Button 
                 variant="secondary-action" 
                 className="flex-1"
-                onClick={onReject}
-                disabled={!canReroll}
+                onClick={onStartOver}
               >
-                {canReroll ? "Meh, Try Again" : "No More Rerolls"}
+                Start Over
               </Button>
             </div>
-
-            {!canReroll && (
-              <p className="text-xs text-muted-foreground text-center">
-                Fine. Clearly you hate happiness. This is your last chance.
-              </p>
-            )}
           </div>
         </Card>
 
         <div className="text-center">
           <Button 
             variant="ghost" 
-            onClick={() => window.location.reload()}
+            onClick={onStartOver}
             className="text-muted-foreground"
           >
             ← Start Over

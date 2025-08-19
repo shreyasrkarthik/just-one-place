@@ -19,7 +19,7 @@ const FALLBACK_LOCATION = {
 };
 
 export const getCurrentLocation = (): Promise<UserLocation> => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     if (!navigator.geolocation) {
       reject(new Error("Geolocation is not supported by this browser"));
       return;
@@ -28,18 +28,119 @@ export const getCurrentLocation = (): Promise<UserLocation> => {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
+        console.log(`📍 GPS coordinates obtained: ${latitude}, ${longitude}`);
         
-        // For a static website, we'll use mock city/state data
-        // In a real app, you'd use reverse geocoding API
-        const mockCity = "Your City";
-        const mockState = "Your State";
-        
-        resolve({
-          latitude,
-          longitude,
-          city: mockCity,
-          state: mockState
-        });
+        try {
+          // If we have an API key, use reverse geocoding to get city/state
+          if (OPENCAGE_API_KEY) {
+            console.log('🌐 Using reverse geocoding to get city/state from coordinates...');
+            
+            const response = await fetch(
+              `${OPENCAGE_BASE_URL}?q=${latitude}+${longitude}&key=${OPENCAGE_API_KEY}&limit=1`
+            );
+
+            if (response.ok) {
+              const data = await response.json();
+              console.log('📡 Reverse geocoding response:', data);
+
+              if (data.results && data.results.length > 0) {
+                const result = data.results[0];
+                const components = result.components;
+                
+                console.log('🔍 Reverse geocoding components:', components);
+
+                // Try multiple possible field names for city and state
+                const city = components.city || components.town || components.village || components.county || components.suburb || components.neighbourhood;
+                const state = components.state_code || components.state || components.province || components.region;
+
+                console.log('📍 Extracted city/state:', { city, state });
+
+                if (city && state) {
+                  const location: UserLocation = {
+                    latitude,
+                    longitude,
+                    city,
+                    state
+                  };
+                  
+                  console.log('✅ Reverse geocoding successful:', location);
+                  resolve(location);
+                  return;
+                } else {
+                  console.warn('⚠️ Missing city or state from reverse geocoding:', { city, state });
+                  
+                  // Try to extract from formatted address as fallback
+                  if (result.formatted) {
+                    console.log('🔄 Trying to extract from formatted address:', result.formatted);
+                    const addressParts = result.formatted.split(',').map(part => part.trim());
+                    
+                    if (addressParts.length >= 2) {
+                      const potentialCity = addressParts[0];
+                      const potentialState = addressParts[addressParts.length - 1];
+                      
+                      // Basic validation - state should be 2-3 characters, city should be longer
+                      if (potentialState.length <= 3 && potentialCity.length > 3) {
+                        const fallbackLocation: UserLocation = {
+                          latitude,
+                          longitude,
+                          city: potentialCity,
+                          state: potentialState
+                        };
+                        
+                        console.log('✅ Fallback extraction successful:', fallbackLocation);
+                        resolve(fallbackLocation);
+                        return;
+                      }
+                    }
+                  }
+                }
+              } else {
+                console.warn('⚠️ No results from reverse geocoding API');
+              }
+            } else {
+              console.warn(`⚠️ Reverse geocoding API failed with status: ${response.status}`);
+            }
+            
+            console.warn('⚠️ Reverse geocoding failed, falling back to mock data');
+          }
+
+          // Fallback: Use mock city/state data based on coordinates
+          // This provides a better experience than "Your City, Your State"
+          const mockLocation = getMockLocationFromCoordinates(latitude, longitude);
+          if (mockLocation) {
+            console.log('📍 Using mock location based on coordinates:', mockLocation);
+            resolve(mockLocation);
+            return;
+          }
+
+          // Final fallback: Use coordinates with generic location
+          console.log('🔄 Using generic location as final fallback');
+          resolve({
+            latitude,
+            longitude,
+            city: "Your Area",
+            state: "Your State"
+          });
+
+        } catch (error) {
+          console.error('❌ Error in reverse geocoding:', error);
+          
+          // Try mock location fallback
+          const mockLocation = getMockLocationFromCoordinates(latitude, longitude);
+          if (mockLocation) {
+            console.log('📍 Using mock location fallback:', mockLocation);
+            resolve(mockLocation);
+            return;
+          }
+
+          // Final fallback
+          resolve({
+            latitude,
+            longitude,
+            city: "Your Area",
+            state: "Your State"
+          });
+        }
       },
       (error) => {
         let message = "Unable to get your location";
@@ -272,6 +373,42 @@ const getMockLocationFromZip = (zip: string): UserLocation => {
   // If ZIP not in mock data, throw error to trigger fallback
   console.warn(`⚠️ ZIP code ${zip} not found in mock data`);
   throw new Error(`ZIP code ${zip} not found in mock data`);
+};
+
+// Helper function to find the closest mock location based on coordinates
+const getMockLocationFromCoordinates = (lat: number, lng: number): UserLocation | null => {
+  const mockLocations = [
+    { lat: 30.2672, lng: -97.7431, city: "Austin", state: "TX" },
+    { lat: 40.7505, lng: -73.9965, city: "New York", state: "NY" },
+    { lat: 34.1030, lng: -118.4105, city: "Beverly Hills", state: "CA" },
+    { lat: 41.8857, lng: -87.6225, city: "Chicago", state: "IL" },
+    { lat: 25.7743, lng: -80.1937, city: "Miami", state: "FL" },
+    { lat: 47.6062, lng: -122.3321, city: "Seattle", state: "WA" },
+    { lat: 39.7392, lng: -104.9903, city: "Denver", state: "CO" },
+    { lat: 45.5152, lng: -122.6784, city: "Portland", state: "OR" },
+    { lat: 36.1627, lng: -86.7816, city: "Nashville", state: "TN" },
+    { lat: 37.7749, lng: -122.4194, city: "San Francisco", state: "CA" }
+  ];
+
+  let closestLocation = null;
+  let shortestDistance = Infinity;
+
+  for (const location of mockLocations) {
+    const distance = getDistanceInMiles(lat, lng, location.lat, location.lng);
+    
+    // If within 50 miles of a known city, use it
+    if (distance <= 50 && distance < shortestDistance) {
+      shortestDistance = distance;
+      closestLocation = {
+        latitude: lat,
+        longitude: lng,
+        city: location.city,
+        state: location.state
+      };
+    }
+  }
+
+  return closestLocation;
 };
 
 // Rate limiting utility for API calls

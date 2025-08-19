@@ -1,50 +1,44 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { useEffect } from "react";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+import { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Index } from "./pages/Index";
+import { NotFound } from "./pages/NotFound";
+import { Toaster } from "./components/ui/sonner";
 
-// Custom hook to manage page titles
-const usePageTitle = () => {
-  const location = useLocation();
-  
+function App() {
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+
   useEffect(() => {
-    const path = location.pathname;
+    const handleRouteChange = () => {
+      setCurrentPath(window.location.pathname);
+    };
+
+    window.addEventListener("popstate", handleRouteChange);
+    return () => window.removeEventListener("popstate", handleRouteChange);
+  }, []);
+
+  useEffect(() => {
     let title = "VibePick - One Perfect Recommendation";
     
-    if (path === "/") {
+    if (currentPath === "/") {
       title = "VibePick - One Perfect Recommendation";
     } else {
       title = "Page Not Found - VibePick";
     }
     
     document.title = title;
-  }, [location.pathname]);
-};
+  }, [currentPath]);
 
-// Component to handle page title updates
-const PageTitleHandler = () => {
-  usePageTitle();
-  return null;
-};
-
-const App = () => {
   return (
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <PageTitleHandler />
+    <Router>
+      <div className="App">
         <Routes>
           <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+        <Toaster />
+      </div>
+    </Router>
   );
-};
+}
 
 export default App;
