@@ -42,7 +42,7 @@ export const RecommendationCard = ({
 
         <Card className="overflow-hidden bg-gradient-card shadow-card-custom border-0">
           <div 
-            className="h-48 bg-cover bg-center cursor-pointer hover:scale-105 transition-transform duration-300"
+            className="h-48 bg-cover bg-center cursor-pointer transition-all duration-300 active:scale-95 focus:outline-none focus:ring-2 focus:ring-pink-300 touch-manipulation"
             style={{ backgroundImage: `url(${recommendation.imageUrl})` }}
             onClick={handleMapClick}
           />

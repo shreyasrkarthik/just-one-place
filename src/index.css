@@ -40,10 +40,10 @@ All colors MUST be HSL.
 
     /* Custom VibePick tokens */
     --gradient-hero: linear-gradient(135deg, hsl(269 100% 62%), hsl(330 100% 70%));
-    --gradient-mood: linear-gradient(135deg, hsl(47 100% 88%), hsl(12 100% 85%));
-    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(47 100% 98%));
+    --gradient-mood: linear-gradient(135deg, hsl(350 100% 85%), hsl(45 100% 85%));
+    --gradient-card: linear-gradient(135deg, hsl(350 100% 95%), hsl(45 100% 95%));
     
-    --shadow-mood: 0 4px 20px -2px hsl(269 100% 62% / 0.25);
+    --shadow-mood: 0 4px 20px -2px hsl(350 100% 85% / 0.3);
     --shadow-card: 0 8px 30px -4px hsl(240 10% 3.9% / 0.1);
     --shadow-button: 0 4px 15px -2px hsl(269 100% 62% / 0.4);
 
@@ -96,10 +96,10 @@ All colors MUST be HSL.
     --ring: 269 100% 65%;
 
     --gradient-hero: linear-gradient(135deg, hsl(269 100% 65%), hsl(330 100% 70%));
-    --gradient-mood: linear-gradient(135deg, hsl(240 4% 16%), hsl(240 6% 20%));
-    --gradient-card: linear-gradient(135deg, hsl(240 6% 10%), hsl(240 4% 16%));
+    --gradient-mood: linear-gradient(135deg, hsl(350 100% 85%), hsl(45 100% 85%));
+    --gradient-card: linear-gradient(135deg, hsl(350 100% 95%), hsl(45 100% 95%));
     
-    --shadow-mood: 0 4px 20px -2px hsl(269 100% 65% / 0.3);
+    --shadow-mood: 0 4px 20px -2px hsl(350 100% 85% / 0.3);
     --shadow-card: 0 8px 30px -4px hsl(0 0% 0% / 0.5);
     --shadow-button: 0 4px 15px -2px hsl(269 100% 65% / 0.5);
     --sidebar-background: 240 5.9% 10%;
@@ -168,4 +168,98 @@ All colors MUST be HSL.
 
 .roll-dice {
   animation: roll 1s ease-in-out forwards;
+}
+
+/* Mobile-friendly interactions */
+@layer utilities {
+  /* Enhanced touch feedback for mobile */
+  @media (hover: none) and (pointer: coarse) {
+    .touch-manipulation {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    
+    /* Smooth active states for mobile */
+    .active\:scale-95:active {
+      transform: scale(0.95) !important;
+      transition: transform 0.1s ease-out;
+    }
+    
+    .active\:scale-90:active {
+      transform: scale(0.9) !important;
+      transition: transform 0.1s ease-out;
+    }
+  }
+
+  /* Alternative active states for mobile */
+  @media (hover: none) and (pointer: coarse) {
+    .hover\:scale-105:active,
+    .hover\:scale-110:active,
+    .hover\:scale-125:active {
+      transform: scale(0.95) !important;
+    }
+    
+    .hover\:shadow-lg:active {
+      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+    }
+  }
+
+  /* Enhanced focus states for accessibility */
+  .focus-visible:focus {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+
+/* Custom gradients and shadows */
+.bg-gradient-mood {
+  background: linear-gradient(135deg, #ffb3ba 0%, #ffdfba 100%);
+}
+
+.bg-gradient-hero {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-gradient-card {
+  background: linear-gradient(135deg, #ffe5e5 0%, #fff0e5 100%);
+}
+
+.shadow-button-custom {
+  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
+}
+
+.shadow-mood {
+  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
+}
+
+.shadow-card-custom {
+  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Mood board animations */
+.roll-dice {
+  animation: roll 1s ease-in-out;
+}
+
+@keyframes roll {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.slot-list {
+  --items: 1;
+}
+
+.slot-animate {
+  animation: slot 1s ease-in-out;
+}
+
+@keyframes slot {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(calc(-100% * var(--items))); }
+}
+
+/* Font family */
+.font-heading {
+  font-family: 'Poppins', sans-serif;
 }

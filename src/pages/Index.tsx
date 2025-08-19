@@ -1,17 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MoodBoard } from "@/components/MoodBoard";
 import { LocationRequest } from "@/components/LocationRequest";
 import { LoadingRecommendation } from "@/components/LoadingRecommendation";
 import { RecommendationCard } from "@/components/RecommendationCard";
-import Feedback from "@/components/Feedback";
 import BuyMeCoffee from "@/components/BuyMeCoffee";
 import { getCurrentLocation, getLocationFromZip, UserLocation } from "@/utils/location";
 import { getLocationAwareRecommendation, LocationAwareRecommendation } from "@/utils/placesService";
 import { toast } from "@/hooks/use-toast";
+import { useSearchParams } from "react-router-dom";
 
 type AppState = "mood-selection" | "location-request" | "loading" | "recommendation";
 
 const Index = () => {
+  const [searchParams] = useSearchParams();
   const [state, setState] = useState<AppState>("mood-selection");
   const [selectedMood, setSelectedMood] = useState<string>("");
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -19,7 +20,35 @@ const Index = () => {
   const [recommendation, setRecommendation] = useState<LocationAwareRecommendation | null>(null);
   const [locationError, setLocationError] = useState<string>("");
 
+  // Ensure page always starts in mood-selection state
+  useEffect(() => {
+    console.log("Index component mounted, setting state to mood-selection");
+    
+    // Check for any URL parameters that might interfere
+    const urlParams = Object.fromEntries(searchParams.entries());
+    console.log("URL parameters:", urlParams);
+    
+    // Clear any persisted state
+    localStorage.removeItem("vibepick-state");
+    sessionStorage.removeItem("vibepick-state");
+    
+    // Force reset to mood-selection state
+    setState("mood-selection");
+    setSelectedMood("");
+    setUserLocation(null);
+    setHasRerolled(false);
+    setRecommendation(null);
+    setLocationError("");
+  }, [searchParams]);
+
+  // Debug logging
+  useEffect(() => {
+    console.log("State changed to:", state);
+    console.log("Selected mood:", selectedMood);
+  }, [state, selectedMood]);
+
   const handleMoodSelect = (mood: string) => {
+    console.log("Mood selected:", mood);
     setSelectedMood(mood);
     setHasRerolled(false);
     setState("location-request");
@@ -119,9 +148,13 @@ const Index = () => {
 
   let content;
 
+  console.log("Rendering content for state:", state);
+
   if (state === "mood-selection") {
+    console.log("Rendering MoodBoard component");
     content = <MoodBoard onMoodSelect={handleMoodSelect} />;
   } else if (state === "location-request") {
+    console.log("Rendering LocationRequest component");
     content = (
       <LocationRequest
         onLocationGranted={handleLocationGranted}
@@ -131,6 +164,7 @@ const Index = () => {
       />
     );
   } else if (state === "loading") {
+    console.log("Rendering LoadingRecommendation component");
     const moodLabels: Record<string, { label: string; image: string }> = {
       restless: { label: "Restless", image: "/vibes/restless.png" },
       sad: { label: "Sad", image: "/vibes/sad.png" },
@@ -158,6 +192,7 @@ const Index = () => {
       />
     );
   } else {
+    console.log("Rendering RecommendationCard component");
     content = (
       <RecommendationCard
         recommendation={recommendation!}
@@ -171,7 +206,6 @@ const Index = () => {
   return (
     <>
       {content}
-      <Feedback />
       <BuyMeCoffee />
     </>
   );

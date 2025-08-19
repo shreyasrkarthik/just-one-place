@@ -1,7 +1,6 @@
 import { useState, useRef, type CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 import confetti from "canvas-confetti";
-import { trackEvent } from "@/lib/analytics";
 
 interface Mood {
   id: string;
@@ -111,14 +110,12 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
     setTimeout(() => {
       mascotRef.current?.classList.remove("animate-bounce");
       setAnimating(null);
-      trackEvent("mood_selected", { mood: mood.id });
       onMoodSelect(mood.id);
     }, 600);
   };
 
   const handleSurprise = () => {
     if (rolling) return;
-    trackEvent("surprise_me_clicked");
     setGuideText("Rolling the dice...");
     const finalMood = moods[Math.floor(Math.random() * moods.length)];
     const items = Array.from({ length: 8 }, () => moods[Math.floor(Math.random() * moods.length)].label);
@@ -132,7 +129,6 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
       setSlotAnimating(false);
       setRolling(false);
       setSlotItems(["Surprise Me"]);
-      trackEvent("pageview");
       handleMoodClick(finalMood);
     }, 1000);
   };
@@ -148,9 +144,13 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
     <div className="min-h-screen flex flex-col items-center justify-center p-6">
       <div className="max-w-lg w-full space-y-8">
         <header className="text-center space-y-4">
-          <h1 className="font-heading text-5xl font-extrabold tracking-tight text-foreground">
-            Vibe Pick
-          </h1>
+          <div className="flex items-center justify-between">
+            <div></div> {/* Empty div for spacing */}
+            <h1 className="font-heading text-5xl font-extrabold tracking-tight text-foreground">
+              Vibe Pick
+            </h1>
+            <div></div> {/* Empty div for spacing */}
+          </div>
         </header>
 
         <div className="text-center space-y-2">
@@ -166,28 +166,29 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
 
         <div className="grid grid-cols-3 gap-4">
           {moods.map((mood) => (
-            <div key={mood.id} className="group [perspective:1000px]">
+            <div key={mood.id} className="space-y-2">
               <Button
                 variant="mood"
                 onClick={() => handleMoodClick(mood)}
                 onMouseEnter={() => setGuideText(guideMessages[mood.id])}
                 onMouseLeave={() => setGuideText(defaultGuide)}
-                className={`h-24 w-full p-0 relative overflow-hidden ${animating === mood.id ? 'fixed inset-0 z-50 scale-150 flex items-center justify-center text-2xl' : 'text-center'}`}
+                onTouchStart={() => setGuideText(guideMessages[mood.id])}
+                onTouchEnd={() => setTimeout(() => setGuideText(defaultGuide), 2000)}
+                className={`h-24 w-full p-0 relative overflow-hidden touch-manipulation transition-all duration-200 active:scale-95 ${animating === mood.id ? 'fixed inset-0 z-50 scale-150 flex items-center justify-center text-2xl' : 'text-center'}`}
               >
-                <div className="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-                  <div className="absolute inset-0 flex flex-col items-center justify-center [backface-visibility:hidden]">
-                    <img
-                      src={mood.image}
-                      alt={mood.label}
-                      className={`w-8 h-8 mb-1 transition-transform duration-500 ${mood.id === 'celebratory' ? 'group-hover:scale-125 group-hover:rotate-12' : ''} ${mood.id === 'energetic' ? 'group-hover:animate-pulse' : ''}`}
-                    />
-                    <span className="text-sm font-medium">{mood.label}</span>
-                  </div>
-                  <div className="absolute inset-0 w-full h-full p-2 text-xs leading-tight flex items-center justify-center text-center whitespace-normal break-words overflow-hidden [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                    {mood.tagline}
-                  </div>
+                <div className="flex flex-col items-center justify-center h-full">
+                  <img
+                    src={mood.image}
+                    alt={mood.label}
+                    className={`w-8 h-8 mb-1 transition-transform duration-200 ${mood.id === 'celebratory' ? 'active:scale-125 active:rotate-12' : ''} ${mood.id === 'energetic' ? 'active:animate-pulse' : ''}`}
+                  />
+                  <span className="text-sm font-medium">{mood.label}</span>
                 </div>
               </Button>
+              {/* Always visible tagline for mobile */}
+              <p className="text-xs text-muted-foreground text-center leading-tight px-1 min-h-[2.5rem] flex items-center justify-center">
+                {mood.tagline}
+              </p>
             </div>
           ))}
         </div>
@@ -232,8 +233,7 @@ export const MoodBoard = ({ onMoodSelect }: MoodBoardProps) => {
             <a
               href={todayPick.link}
               target="_blank"
-              className="block bg-gradient-card p-4 rounded-lg shadow-card-custom hover:shadow-lg transition-shadow"
-              onClick={() => trackEvent("daily_pick_clicked")}
+              className="block bg-gradient-card p-4 rounded-lg shadow-card-custom transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-pink-300 touch-manipulation"
             >
               <p className="text-sm text-muted-foreground">{todayPick.text}</p>
             </a>
