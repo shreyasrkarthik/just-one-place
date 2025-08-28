@@ -1,4 +1,5 @@
 import { UserLocation, getDistanceInMiles } from "./location";
+import { realPlacesService, RealPlace } from "./realPlacesService";
 
 interface Place {
   name: string;
@@ -110,6 +111,13 @@ export interface LocationAwareRecommendation {
   openHours: string;
   distance: string;
   userLocation: string;
+  // New fields for real API data
+  rating?: number;
+  priceLevel?: string;
+  openNow?: boolean;
+  photos?: string[];
+  website?: string;
+  phone?: string;
 }
 
 export const getLocationAwareRecommendation = async (
@@ -125,15 +133,147 @@ export const getLocationAwareRecommendation = async (
       state: userLocation.state,
       zipCode: userLocation.zipCode
     },
-    reroll
+    reroll,
+    timestamp: new Date().toISOString()
   });
 
+  console.log('🚀 Starting Foursquare Places API recommendation flow...');
+
+  // Try to get real API recommendations first
+  try {
+    const realPlaces = await realPlacesService.getMoodBasedRecommendations(mood, userLocation);
+    
+    if (realPlaces.length > 0) {
+      console.log(`✅ Found ${realPlaces.length} real API recommendations`);
+      
+      // Select place based on reroll
+      const placeIndex = reroll ? Math.min(1, realPlaces.length - 1) : 0;
+      const selectedPlace = realPlaces[placeIndex] || realPlaces[0];
+      
+      console.log(`🎯 Selected Foursquare place from ${realPlaces.length} options:`, {
+        selectedIndex: placeIndex,
+        isReroll: reroll,
+        place: {
+          name: selectedPlace.name,
+          category: selectedPlace.category,
+          rating: selectedPlace.rating || 'No rating',
+          distance: `${selectedPlace.distance.toFixed(1)} miles`,
+          address: selectedPlace.address,
+          openNow: selectedPlace.openNow ? 'Open' : 'Closed/Unknown',
+          priceLevel: selectedPlace.priceLevel || 'No price info',
+          fsqId: selectedPlace.id,
+          coordinates: `${selectedPlace.latitude}, ${selectedPlace.longitude}`
+        }
+      });
+      
+      // Get mood info
+      const moodLabels: Record<string, { label: string; image: string }> = {
+        restless: { label: "Restless", image: "/vibes/restless.png" },
+        sad: { label: "Sad", image: "/vibes/sad.png" },
+        romantic: { label: "Romantic", image: "/vibes/romantic.png" },
+        anxious: { label: "Anxious", image: "/vibes/anxious.png" },
+        celebratory: { label: "Celebratory", image: "/vibes/celebratory.png" },
+        bored: { label: "Bored", image: "/vibes/bored.png" },
+        energetic: { label: "Energetic", image: "/vibes/energetic.png" },
+        adventurous: { label: "Adventurous", image: "/vibes/adventorous.png" },
+        nostalgic: { label: "Nostalgic", image: "/vibes/nostalgic.png" },
+        surprise: { label: "Surprise Me", image: "/vibes/surprise.png" }
+      };
+
+      const moodInfo = moodLabels[mood] || moodLabels.surprise;
+      const reasons = wittyReasons[mood] || wittyReasons.surprise;
+      const reasonIndex = reroll ? Math.min(1, reasons.length - 1) : 0;
+      
+      // Generate location-aware address
+      const locationText = userLocation.city && userLocation.state 
+        ? `${userLocation.city}, ${userLocation.state}`
+        : userLocation.zipCode 
+          ? `ZIP ${userLocation.zipCode}`
+          : "your area";
+      
+      const fullAddress = selectedPlace.address.includes(userLocation.city || '') 
+        ? selectedPlace.address 
+        : `${selectedPlace.address}, ${locationText}`;
+
+      const recommendation: LocationAwareRecommendation = {
+        name: selectedPlace.name,
+        address: fullAddress,
+        reason: reasons[reasonIndex],
+        imageUrl: moodInfo.image,
+        mapsUrl: `https://maps.apple.com/?q=${encodeURIComponent(selectedPlace.name + " " + fullAddress)}`,
+        mood: moodInfo.label,
+        moodImage: moodInfo.image,
+        openHours: selectedPlace.openNow ? "Open now" : "Check hours online",
+        distance: `${selectedPlace.distance.toFixed(1)} miles away`,
+        userLocation: locationText,
+        // Real API data
+        rating: selectedPlace.rating,
+        priceLevel: selectedPlace.priceLevel,
+        openNow: selectedPlace.openNow,
+        photos: selectedPlace.photos,
+        website: selectedPlace.website,
+        phone: selectedPlace.phone
+      };
+
+      console.log('🎉 Foursquare API recommendation generated:', {
+        source: 'Foursquare Places API',
+        place: recommendation.name,
+        address: recommendation.address,
+        distance: recommendation.distance,
+        rating: recommendation.rating,
+        priceLevel: recommendation.priceLevel,
+        openNow: recommendation.openNow,
+        category: selectedPlace.category,
+        mood: recommendation.mood,
+        placeId: selectedPlace.id,
+        coordinates: `${selectedPlace.latitude}, ${selectedPlace.longitude}`,
+        website: recommendation.website,
+        phone: recommendation.phone,
+        photosCount: recommendation.photos?.length || 0
+      });
+
+      // Summary log for complete recommendation flow
+      console.log('📊 FOURSQUARE RECOMMENDATION SUMMARY:', {
+        success: true,
+        apiUsed: 'Foursquare Places API',
+        mood: mood,
+        userLocation: `${userLocation.city || 'Unknown'}, ${userLocation.state || 'Unknown'}`,
+        searchRadius: '10km',
+        totalPlacesFound: realPlaces.length,
+        selectedPlaceIndex: placeIndex,
+        isReroll: reroll,
+        finalRecommendation: {
+          name: recommendation.name,
+          category: selectedPlace.category,
+          rating: recommendation.rating,
+          distance: recommendation.distance,
+          openStatus: recommendation.openNow ? 'Open' : 'Closed/Unknown',
+          hasRichData: {
+            photos: (recommendation.photos?.length || 0) > 0,
+            website: !!recommendation.website,
+            phone: !!recommendation.phone,
+            rating: !!recommendation.rating,
+            priceLevel: !!recommendation.priceLevel
+          }
+        },
+        timestamp: new Date().toISOString()
+      });
+      
+      return recommendation;
+    }
+  } catch (error) {
+    console.warn('⚠️ Real API failed, falling back to mock data:', error);
+  }
+
+  // Fallback to existing mock data system
+  console.log('🔄 Falling back to mock data system');
+  
   const categories = moodToCategories[mood] || moodToCategories.surprise;
   const reasons = wittyReasons[mood] || wittyReasons.surprise;
   
   console.log(`🎭 Mood categories for "${mood}":`, categories);
   
-  // Filter places by category and distance (20 mile limit)
+  // Filter places by category and distance (10km ≈ 6.2 mile limit)
   let relevantPlaces = samplePlaces.filter(place => {
     if (categories.includes(place.category)) {
       // For Austin coordinates, calculate real distance
@@ -144,7 +284,7 @@ export const getLocationAwareRecommendation = async (
           place.latitude,
           place.longitude
         );
-        const isWithinRange = distance <= 20;
+        const isWithinRange = distance <= 6.2; // 10km in miles
         
         if (isWithinRange) {
           console.log(`📍 Place "${place.name}" is within range: ${distance.toFixed(1)} miles`);
@@ -159,7 +299,7 @@ export const getLocationAwareRecommendation = async (
     return false;
   });
 
-  console.log(`🔍 Found ${relevantPlaces.length} relevant places within 20 miles`);
+  console.log(`🔍 Found ${relevantPlaces.length} relevant places within 10km`);
 
   // If no relevant places found, use surprise category
   if (relevantPlaces.length === 0) {

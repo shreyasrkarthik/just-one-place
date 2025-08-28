@@ -49,12 +49,13 @@ export const LoadingRecommendation = ({ mood }: LoadingRecommendationProps) => {
                 <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse"></div>
               </div>
               <p className="text-sm text-muted-foreground">
-                Scanning places within 20 miles • Checking hours • Applying mood filter
+                Scanning places within 10km • Checking hours • Applying mood filter
               </p>
             </div>
           </div>
 
           <div className="text-xs text-muted-foreground space-y-1">
+            <p>• Searching within 10km of your location</p>
             <p>• Only showing places that are open now</p>
             <p>• No endless lists, just one perfect pick</p>
             <p>• Guaranteed to match your {moodLabel.toLowerCase()} vibe</p>
