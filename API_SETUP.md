@@ -109,7 +109,7 @@ The app automatically handles API rate limits:
 - Yelp: 500 requests per day (fallback)
 
 ### Search Radius
-Default search radius is 20km (12.4 miles). You can modify this in `realPlacesService.ts`.
+Default search radius is 10km (6.2 miles). You can modify this in `realPlacesService.ts`.
 
 ### Fallback Strategy
 If no places are found in the primary categories, the app will:

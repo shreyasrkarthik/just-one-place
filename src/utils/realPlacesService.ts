@@ -35,7 +35,7 @@ const API_CONFIG = {
   },
   FOURSQUARE: {
     API_KEY: import.meta.env.VITE_FOURSQUARE_API_KEY || 'XUNJF22RNH4EYNLLEQGMUZISBOYCXDSF1M0CAAVQJ0WEU4AW',
-    BASE_URL: import.meta.env.DEV ? '/api/foursquare/places' : 'https://places-api.foursquare.com/places', // Use proxy in development
+    BASE_URL: '/api/foursquare/places', // Always use API route (works in both dev and production)
     RATE_LIMIT: 50, // requests per day (free tier)
     API_VERSION: '2025-06-17', // Required API version header
   },
@@ -260,13 +260,18 @@ export class FoursquarePlacesService {
     });
 
     try {
-      const response = await fetch(url, {
-        headers: {
-          'X-Places-Api-Version': API_CONFIG.FOURSQUARE.API_VERSION,
-          'Authorization': `Bearer ${API_CONFIG.FOURSQUARE.API_KEY}`,
-          'Accept': 'application/json'
-        }
-      });
+      // Build headers - don't send auth headers when using API route (it handles auth)
+      const headers: Record<string, string> = {
+        'Accept': 'application/json'
+      };
+      
+      // Only add auth headers if making direct API calls (not through our API route)
+      if (url.startsWith('https://')) {
+        headers['X-Places-Api-Version'] = API_CONFIG.FOURSQUARE.API_VERSION;
+        headers['Authorization'] = `Bearer ${API_CONFIG.FOURSQUARE.API_KEY}`;
+      }
+
+      const response = await fetch(url, { headers });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -360,7 +365,7 @@ export class RealPlacesService {
   async getMoodBasedRecommendations(
     mood: string,
     userLocation: UserLocation,
-    radius: number = 20000 // 20km default
+    radius: number = 10000 // 10km default
   ): Promise<RealPlace[]> {
     const foursquareCategories = moodToFoursquareCategories[mood] || moodToFoursquareCategories.surprise;
     const keywords = moodToSearchKeywords[mood] || moodToSearchKeywords.surprise;

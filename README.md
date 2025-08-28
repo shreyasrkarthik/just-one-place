@@ -6,7 +6,7 @@ Stop scrolling through endless options. VibePick gives you exactly one perfect r
 
 - 🗺️ **ZIP Code to Location**: Comprehensive US ZIP code coverage via OpenCage API
 - 🎯 **Mood-Based Recommendations**: Get personalized place suggestions based on your current mood
-- 📍 **Location Awareness**: Find places within 20 miles of your location
+- 📍 **Location Awareness**: Find places within 10km of your location
 - 🏢 **Real Place Data**: Dynamic recommendations from Foursquare Places API
 - 🎭 **Smart Filtering**: Places automatically filtered by mood category and proximity
 - ⭐ **Rich Data**: Ratings, photos, hours, and contact information

@@ -20,13 +20,11 @@ export default defineConfig(({ mode }) => ({
           });
           proxy.on('proxyReq', (proxyReq, req, _res) => {
             console.log('Sending Request to Foursquare:', req.method, req.url);
-            // Ensure headers are properly forwarded
-            if (req.headers['x-places-api-version']) {
-              proxyReq.setHeader('X-Places-Api-Version', req.headers['x-places-api-version']);
-            }
-            if (req.headers['authorization']) {
-              proxyReq.setHeader('Authorization', req.headers['authorization']);
-            }
+            // Always set required Foursquare headers for development
+            proxyReq.setHeader('X-Places-Api-Version', '2025-06-17');
+            proxyReq.setHeader('Authorization', 'Bearer XUNJF22RNH4EYNLLEQGMUZISBOYCXDSF1M0CAAVQJ0WEU4AW');
+            proxyReq.setHeader('Accept', 'application/json');
+            proxyReq.setHeader('User-Agent', 'VibePick/1.0');
           });
           proxy.on('proxyRes', (proxyRes, req, _res) => {
             console.log('Received Response from Foursquare:', proxyRes.statusCode, req.url);

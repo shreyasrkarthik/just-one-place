@@ -238,7 +238,7 @@ export const getLocationAwareRecommendation = async (
         apiUsed: 'Foursquare Places API',
         mood: mood,
         userLocation: `${userLocation.city || 'Unknown'}, ${userLocation.state || 'Unknown'}`,
-        searchRadius: '20km',
+        searchRadius: '10km',
         totalPlacesFound: realPlaces.length,
         selectedPlaceIndex: placeIndex,
         isReroll: reroll,
@@ -273,7 +273,7 @@ export const getLocationAwareRecommendation = async (
   
   console.log(`🎭 Mood categories for "${mood}":`, categories);
   
-  // Filter places by category and distance (20 mile limit)
+  // Filter places by category and distance (10km ≈ 6.2 mile limit)
   let relevantPlaces = samplePlaces.filter(place => {
     if (categories.includes(place.category)) {
       // For Austin coordinates, calculate real distance
@@ -284,7 +284,7 @@ export const getLocationAwareRecommendation = async (
           place.latitude,
           place.longitude
         );
-        const isWithinRange = distance <= 20;
+        const isWithinRange = distance <= 6.2; // 10km in miles
         
         if (isWithinRange) {
           console.log(`📍 Place "${place.name}" is within range: ${distance.toFixed(1)} miles`);
@@ -299,7 +299,7 @@ export const getLocationAwareRecommendation = async (
     return false;
   });
 
-  console.log(`🔍 Found ${relevantPlaces.length} relevant places within 20 miles`);
+  console.log(`🔍 Found ${relevantPlaces.length} relevant places within 10km`);
 
   // If no relevant places found, use surprise category
   if (relevantPlaces.length === 0) {
