@@ -53,6 +53,9 @@ console.log('🔑 API Configuration Status:', {
   foursquareKeyPrefix: API_CONFIG.FOURSQUARE.API_KEY.substring(0, 10) + '...',
   foursquareBaseUrl: API_CONFIG.FOURSQUARE.BASE_URL,
   foursquareApiVersion: API_CONFIG.FOURSQUARE.API_VERSION,
+  isDevelopment: import.meta.env.DEV,
+  isProduction: import.meta.env.PROD,
+  environment: import.meta.env.MODE,
   googleConfigured: !!API_CONFIG.GOOGLE_PLACES.API_KEY,
   yelpConfigured: !!API_CONFIG.YELP.API_KEY
 });
@@ -246,32 +249,38 @@ export class FoursquarePlacesService {
       queryParams.append('categories', category);
     }
 
+    // Always use the API route (proxy) to avoid CORS issues
     const url = `${API_CONFIG.FOURSQUARE.BASE_URL}/search?${queryParams.toString()}`;
 
     console.log('🔍 Foursquare API request:', {
-      url: url.replace(API_CONFIG.FOURSQUARE.API_KEY, 'API_KEY_HIDDEN'),
+      baseUrl: API_CONFIG.FOURSQUARE.BASE_URL,
+      fullUrl: url,
+      isUsingProxy: !url.startsWith('https://'),
       parameters: {
         location: `${latitude}, ${longitude}`,
         radius: `${radius}m`,
         category: category || 'None',
         keyword: keyword || 'None',
         limit: '50'
+      },
+      environment: {
+        isDev: import.meta.env.DEV,
+        isProd: import.meta.env.PROD,
+        mode: import.meta.env.MODE
       }
     });
 
     try {
-      // Build headers - don't send auth headers when using API route (it handles auth)
+      // When using API route (proxy), we don't need auth headers - the proxy handles that
       const headers: Record<string, string> = {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       };
-      
-      // Only add auth headers if making direct API calls (not through our API route)
-      if (url.startsWith('https://')) {
-        headers['X-Places-Api-Version'] = API_CONFIG.FOURSQUARE.API_VERSION;
-        headers['Authorization'] = `Bearer ${API_CONFIG.FOURSQUARE.API_KEY}`;
-      }
 
-      const response = await fetch(url, { headers });
+      const response = await fetch(url, { 
+        method: 'GET',
+        headers 
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
