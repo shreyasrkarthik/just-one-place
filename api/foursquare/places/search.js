@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     const queryParams = new URLSearchParams(req.query);
     const foursquareUrl = `https://places-api.foursquare.com/places/search?${queryParams.toString()}`;
 
-    console.log('🔍 Proxying Foursquare request:', foursquareUrl.replace(API_KEY, 'API_KEY_HIDDEN'));
+    // Proxying Foursquare request
 
     // Make the request to Foursquare API
     const response = await fetch(foursquareUrl, {
@@ -34,7 +34,6 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('❌ Foursquare API error:', response.status, errorText);
       return res.status(response.status).json({ 
         error: 'Foursquare API error', 
         details: errorText 
@@ -42,11 +41,6 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-    
-    console.log('✅ Foursquare API success:', {
-      resultsCount: data.results?.length || 0,
-      status: response.status
-    });
 
     // Set CORS headers to allow requests from your domain
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -57,7 +51,6 @@ export default async function handler(req, res) {
     return res.status(200).json(data);
 
   } catch (error) {
-    console.error('❌ Proxy error:', error);
     return res.status(500).json({ 
       error: 'Failed to fetch from Foursquare API', 
       details: error.message 

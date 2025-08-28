@@ -28,12 +28,12 @@ export const getCurrentLocation = (): Promise<UserLocation> => {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-        console.log(`📍 GPS coordinates obtained: ${latitude}, ${longitude}`);
+        // GPS coordinates obtained
         
         try {
           // If we have an API key, use reverse geocoding to get city/state
           if (OPENCAGE_API_KEY) {
-            console.log('🌐 Using reverse geocoding to get city/state from coordinates...');
+            // Using reverse geocoding
             
             const response = await fetch(
               `${OPENCAGE_BASE_URL}?q=${latitude}+${longitude}&key=${OPENCAGE_API_KEY}&limit=1`
@@ -41,19 +41,19 @@ export const getCurrentLocation = (): Promise<UserLocation> => {
 
             if (response.ok) {
               const data = await response.json();
-              console.log('📡 Reverse geocoding response:', data);
+              // Reverse geocoding response received
 
               if (data.results && data.results.length > 0) {
                 const result = data.results[0];
                 const components = result.components;
                 
-                console.log('🔍 Reverse geocoding components:', components);
+                // Processing geocoding components
 
                 // Try multiple possible field names for city and state
                 const city = components.city || components.town || components.village || components.county || components.suburb || components.neighbourhood;
                 const state = components.state_code || components.state || components.province || components.region;
 
-                console.log('📍 Extracted city/state:', { city, state });
+                // City and state extracted
 
                 if (city && state) {
                   const location: UserLocation = {
@@ -63,7 +63,7 @@ export const getCurrentLocation = (): Promise<UserLocation> => {
                     state
                   };
                   
-                  console.log('✅ Reverse geocoding successful:', location);
+                  // Reverse geocoding successful
                   resolve(location);
                   return;
                 } else {
@@ -167,12 +167,12 @@ export const getCurrentLocation = (): Promise<UserLocation> => {
 };
 
 export const getLocationFromZip = async (zip: string): Promise<UserLocation> => {
-  console.log(`🔍 Looking up ZIP code: ${zip}`);
+  // Looking up ZIP code
   
   try {
     // Clean the ZIP code input
     const cleanZip = zip.trim().replace(/\s+/g, '');
-    console.log(`🧹 Cleaned ZIP code: ${cleanZip}`);
+    // ZIP code cleaned
     
     // Basic ZIP code validation (US format: 5 digits or 5+4 format)
     if (!/^\d{5}(-\d{4})?$/.test(cleanZip)) {
@@ -180,17 +180,16 @@ export const getLocationFromZip = async (zip: string): Promise<UserLocation> => 
       console.error(`❌ ZIP validation failed: ${error}`);
       throw new Error(error);
     }
-    console.log(`✅ ZIP code format validated: ${cleanZip}`);
+    // ZIP code format validated
 
     // If no API key is configured, fall back to mock data for development
     if (!OPENCAGE_API_KEY) {
-      console.warn('⚠️ OpenCage API key not configured. Using mock data.');
+      // API key not configured, using mock data
       const mockLocation = getMockLocationFromZip(cleanZip);
-      console.log('📍 Mock location data:', mockLocation);
       return mockLocation;
     }
 
-    console.log('🌐 Calling OpenCage Geocoding API...');
+    // Calling OpenCage Geocoding API
     
     // Call OpenCage Geocoding API
     const response = await fetch(
@@ -204,7 +203,7 @@ export const getLocationFromZip = async (zip: string): Promise<UserLocation> => 
     }
 
     const data = await response.json();
-    console.log('📡 API Response received:', data);
+    // API Response received
 
     if (!data.results || data.results.length === 0) {
       const error = 'ZIP code not found. Please check and try again.';
@@ -230,7 +229,7 @@ export const getLocationFromZip = async (zip: string): Promise<UserLocation> => 
       zipCode: cleanZip
     };
 
-    console.log('📍 Extracted location data:', location);
+    // Location data extracted
 
     // Validate that we got meaningful coordinates
     if (!location.city || !location.state) {
