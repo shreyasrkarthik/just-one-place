@@ -22,11 +22,8 @@ export const Index = () => {
   }, []);
 
   const handleMoodSelect = (mood: string) => {
-    console.log('🎭 Mood selected:', mood);
     setUserMood(mood);
-    console.log('✅ User mood set to:', mood);
     setCurrentStep("location");
-    console.log('🔄 Moving to location step');
   };
 
   const handleLocationGranted = () => {
@@ -54,11 +51,7 @@ export const Index = () => {
 
   const handleZipSubmit = async (zip: string) => {
     try {
-      console.log('🔍 ZIP code submitted:', zip);
-      console.log('🎭 Current mood:', userMood);
-      
       if (!userMood) {
-        console.error('❌ No mood selected when submitting ZIP code');
         setError("Please select a mood first");
         return;
       }
@@ -66,19 +59,14 @@ export const Index = () => {
       setError("");
       setCurrentStep("loading");
       
-      console.log('📍 Getting location from ZIP code...');
       const location = await getLocationFromZip(zip);
-      console.log('📍 Location obtained:', location);
       setUserLocation(location);
       
-      console.log('🎯 Getting recommendation for mood:', userMood, 'and location:', location);
       // Get recommendation immediately after ZIP location is obtained
       const rec = await getLocationAwareRecommendation(userMood, location);
-      console.log('🎉 Recommendation received:', rec);
       setRecommendation(rec);
       setCurrentStep("recommendation");
     } catch (error) {
-      console.error('❌ Error in handleZipSubmit:', error);
       setError(error instanceof Error ? error.message : "Failed to get location from ZIP code");
       setCurrentStep("location");
     }

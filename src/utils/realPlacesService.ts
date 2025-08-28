@@ -35,7 +35,7 @@ const API_CONFIG = {
   },
   FOURSQUARE: {
     API_KEY: import.meta.env.VITE_FOURSQUARE_API_KEY || 'XUNJF22RNH4EYNLLEQGMUZISBOYCXDSF1M0CAAVQJ0WEU4AW',
-    BASE_URL: '/api/foursquare/places', // Always use API route (works in both dev and production)
+    BASE_URL: import.meta.env.PROD ? 'https://vibepick.shreyasrk.com/api/foursquare/places' : '/api/foursquare/places', // Use original domain in production
     RATE_LIMIT: 50, // requests per day (free tier)
     API_VERSION: '2025-06-17', // Required API version header
   },
@@ -46,16 +46,7 @@ const API_CONFIG = {
   }
 };
 
-// Debug API key configuration on load
-console.log('🔑 API Configuration Status:', {
-  foursquareConfigured: !!API_CONFIG.FOURSQUARE.API_KEY,
-  foursquareKeyLength: API_CONFIG.FOURSQUARE.API_KEY.length,
-  foursquareKeyPrefix: API_CONFIG.FOURSQUARE.API_KEY.substring(0, 10) + '...',
-  foursquareBaseUrl: API_CONFIG.FOURSQUARE.BASE_URL,
-  foursquareApiVersion: API_CONFIG.FOURSQUARE.API_VERSION,
-  googleConfigured: !!API_CONFIG.GOOGLE_PLACES.API_KEY,
-  yelpConfigured: !!API_CONFIG.YELP.API_KEY
-});
+// API configuration loaded
 
 // Mood to Foursquare category IDs mapping (Places API v3)
 // Reference: https://docs.foursquare.com/data-products/docs/categories
@@ -160,7 +151,6 @@ export class GooglePlacesService {
       }));
 
     } catch (error) {
-      console.error('Google Places API error:', error);
       throw error;
     }
   }
@@ -179,7 +169,6 @@ export class GooglePlacesService {
       const data = await response.json();
       return data.result;
     } catch (error) {
-      console.error('Google Places API error:', error);
       throw error;
     }
   }
@@ -212,19 +201,11 @@ export class FoursquarePlacesService {
   }
 
   async searchNearbyPlaces(params: PlacesSearchParams): Promise<RealPlace[]> {
-    console.log('🔑 Foursquare API Key Check:', {
-      hasKey: !!API_CONFIG.FOURSQUARE.API_KEY,
-      keyLength: API_CONFIG.FOURSQUARE.API_KEY.length,
-      keyPrefix: API_CONFIG.FOURSQUARE.API_KEY.substring(0, 10)
-    });
-
     if (!API_CONFIG.FOURSQUARE.API_KEY) {
-      console.error('❌ Foursquare API key not configured');
       throw new Error('Foursquare API key not configured');
     }
 
     if (API_CONFIG.FOURSQUARE.API_KEY.length < 20) {
-      console.error('❌ Foursquare API key appears to be invalid (too short)');
       throw new Error('Foursquare API key appears to be invalid');
     }
 
@@ -246,78 +227,33 @@ export class FoursquarePlacesService {
       queryParams.append('categories', category);
     }
 
+    // Always use the API route (proxy) to avoid CORS issues
     const url = `${API_CONFIG.FOURSQUARE.BASE_URL}/search?${queryParams.toString()}`;
 
-    console.log('🔍 Foursquare API request:', {
-      url: url.replace(API_CONFIG.FOURSQUARE.API_KEY, 'API_KEY_HIDDEN'),
-      parameters: {
-        location: `${latitude}, ${longitude}`,
-        radius: `${radius}m`,
-        category: category || 'None',
-        keyword: keyword || 'None',
-        limit: '50'
-      }
-    });
+    // Making API request to Foursquare
 
     try {
-      // Build headers - don't send auth headers when using API route (it handles auth)
+      // When using API route (proxy), we don't need auth headers - the proxy handles that
       const headers: Record<string, string> = {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       };
-      
-      // Only add auth headers if making direct API calls (not through our API route)
-      if (url.startsWith('https://')) {
-        headers['X-Places-Api-Version'] = API_CONFIG.FOURSQUARE.API_VERSION;
-        headers['Authorization'] = `Bearer ${API_CONFIG.FOURSQUARE.API_KEY}`;
-      }
 
-      const response = await fetch(url, { headers });
+      const response = await fetch(url, { 
+        method: 'GET',
+        headers 
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Foursquare API HTTP Error:', {
-          status: response.status,
-          statusText: response.statusText,
-          errorText: errorText,
-          url: url.replace(API_CONFIG.FOURSQUARE.API_KEY, 'API_KEY_HIDDEN')
-        });
-        throw new Error(`Foursquare API error: ${response.status} - ${errorText}`);
+        throw new Error(`Foursquare API error: ${response.status}`);
       }
 
       const data = await response.json();
       
-      console.log('📡 Foursquare API Response:', {
-        resultsCount: data.results?.length || 0,
-        hasResults: !!data.results,
-        responseKeys: Object.keys(data),
-        firstResult: data.results?.[0] ? {
-          name: data.results[0].name,
-          category: data.results[0].categories?.[0]?.name,
-          hasLocation: !!data.results[0].latitude
-        } : null
-      });
-      
       if (!data.results || data.results.length === 0) {
-        console.log('🔍 No results found from Foursquare API - Full response:', data);
         return [];
       }
-
-      console.log(`✅ Foursquare returned ${data.results.length} places`);
-      
-      // Log all places returned by Foursquare for debugging
-      console.log('📋 Foursquare places details:', data.results.map((place: any, index: number) => ({
-        index: index + 1,
-        name: place.name,
-        category: place.categories?.[0]?.name || 'Unknown',
-        address: place.location?.formatted_address || 'No address',
-        distance: getDistanceInMiles(
-          latitude, 
-          longitude, 
-          place.latitude || 0, 
-          place.longitude || 0
-        ).toFixed(1) + ' miles',
-        fsqId: place.fsq_place_id
-      })));
       
       return data.results.map((place: any) => {
         const address = place.location?.formatted_address || 
@@ -346,7 +282,6 @@ export class FoursquarePlacesService {
       });
 
     } catch (error) {
-      console.error('Foursquare API error:', error);
       throw error;
     }
   }
@@ -370,19 +305,13 @@ export class RealPlacesService {
     const foursquareCategories = moodToFoursquareCategories[mood] || moodToFoursquareCategories.surprise;
     const keywords = moodToSearchKeywords[mood] || moodToSearchKeywords.surprise;
     
-    console.log(`🔍 Searching for ${mood} places with Foursquare categories:`, foursquareCategories);
-    console.log(`🔍 Keywords for ${mood}:`, keywords);
-    
     const allPlaces: RealPlace[] = [];
     
     try {
       // Try Foursquare API first
       if (API_CONFIG.FOURSQUARE.API_KEY) {
-        console.log('🚀 Starting Foursquare search...');
-        
         // Try a simple search first without categories to test API connection
         try {
-          console.log(`🔍 Testing Foursquare API with simple search (no categories)`);
           const testPlaces = await this.foursquareService.searchNearbyPlaces({
             latitude: userLocation.latitude,
             longitude: userLocation.longitude,
@@ -391,16 +320,14 @@ export class RealPlacesService {
           });
           
           allPlaces.push(...testPlaces);
-          console.log(`✅ Found ${testPlaces.length} places with keyword "${keywords[0]}" via Foursquare`);
         } catch (error) {
-          console.warn(`⚠️ Foursquare simple search failed:`, error);
+          // Simple search failed, continue with other methods
         }
 
         // Search by categories if simple search worked or if we need more results
         if (allPlaces.length < 5) {
           for (const categoryId of foursquareCategories.slice(0, 2)) { // Limit to 2 categories to avoid rate limits
             try {
-              console.log(`🔍 Searching Foursquare category: ${categoryId}`);
               const places = await this.foursquareService.searchNearbyPlaces({
                 latitude: userLocation.latitude,
                 longitude: userLocation.longitude,
@@ -409,9 +336,8 @@ export class RealPlacesService {
               });
               
               allPlaces.push(...places);
-              console.log(`✅ Found ${places.length} places in category ${categoryId} via Foursquare`);
             } catch (error) {
-              console.warn(`⚠️ Foursquare category search failed for ${categoryId}:`, error);
+              // Category search failed, continue
             }
           }
         }
@@ -420,7 +346,6 @@ export class RealPlacesService {
         if (allPlaces.length < 10) {
           for (const keyword of keywords.slice(0, 2)) { // Try 2 keywords
             try {
-              console.log(`🔍 Searching Foursquare keyword: "${keyword}"`);
               const places = await this.foursquareService.searchNearbyPlaces({
                 latitude: userLocation.latitude,
                 longitude: userLocation.longitude,
@@ -429,9 +354,8 @@ export class RealPlacesService {
               });
               
               allPlaces.push(...places);
-              console.log(`✅ Found ${places.length} places for keyword "${keyword}" via Foursquare`);
             } catch (error) {
-              console.warn(`⚠️ Foursquare keyword search failed for "${keyword}":`, error);
+              // Keyword search failed, continue
             }
           }
         }
@@ -439,7 +363,6 @@ export class RealPlacesService {
       
       // Fallback to Google Places if Foursquare fails or for additional results
       if (allPlaces.length < 5 && API_CONFIG.GOOGLE_PLACES.API_KEY) {
-        console.log('🔄 Falling back to Google Places...');
         try {
           // Use the first keyword as a fallback search term for Google
           const places = await this.googleService.searchNearbyPlaces({
@@ -451,19 +374,16 @@ export class RealPlacesService {
           });
           
           allPlaces.push(...places);
-          console.log(`✅ Found ${places.length} additional places via Google Places`);
         } catch (error) {
-          console.warn('⚠️ Google Places API search failed:', error);
+          // Google Places search failed
         }
       }
       
     } catch (error) {
-      console.error('❌ All API searches failed:', error);
       throw new Error('Unable to fetch place recommendations at this time');
     }
     
     if (allPlaces.length === 0) {
-      console.log('⚠️ No places found from any API');
       throw new Error('No places found for your location and mood');
     }
     
@@ -478,23 +398,6 @@ export class RealPlacesService {
         return a.distance - b.distance;
       })
       .slice(0, 10); // Return top 10 results
-    
-    console.log(`🎯 Final ${sortedPlaces.length} recommendations for ${mood}:`, 
-      sortedPlaces.map((place, index) => ({
-        rank: index + 1,
-        name: place.name,
-        category: place.category,
-        rating: place.rating || 'No rating',
-        distance: `${place.distance.toFixed(1)} miles`,
-        address: place.address,
-        openNow: place.openNow ? 'Open' : 'Closed/Unknown',
-        priceLevel: place.priceLevel || 'No price info',
-        hasPhotos: place.photos && place.photos.length > 0,
-        hasWebsite: !!place.website,
-        hasPhone: !!place.phone,
-        fsqId: place.id
-      }))
-    );
     
     return sortedPlaces;
   }
