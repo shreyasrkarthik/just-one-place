@@ -7,9 +7,7 @@
   "env": {
     "VITE_FOURSQUARE_API_KEY": "XUNJF22RNH4EYNLLEQGMUZISBOYCXDSF1M0CAAVQJ0WEU4AW"
   },
-  "protectionBypass": {
-    "api/foursquare/places/search.js": "bypass"
-  },
+
   "headers": [
     {
       "source": "/api/(.*)",

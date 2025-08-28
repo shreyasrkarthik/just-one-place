@@ -35,7 +35,7 @@ const API_CONFIG = {
   },
   FOURSQUARE: {
     API_KEY: import.meta.env.VITE_FOURSQUARE_API_KEY || 'XUNJF22RNH4EYNLLEQGMUZISBOYCXDSF1M0CAAVQJ0WEU4AW',
-    BASE_URL: '/api/foursquare/places', // Always use API route (works in both dev and production)
+    BASE_URL: import.meta.env.PROD ? 'https://vibepick.shreyasrk.com/api/foursquare/places' : '/api/foursquare/places', // Use original domain in production
     RATE_LIMIT: 50, // requests per day (free tier)
     API_VERSION: '2025-06-17', // Required API version header
   },
