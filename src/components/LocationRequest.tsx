@@ -78,7 +78,7 @@ export const LocationRequest = ({ onLocationGranted, onZipSubmit, mood, error }:
               <Info className="w-4 h-4" />
               <div className="text-left">
                 <p className="text-sm font-medium">Development Mode</p>
-                <p className="text-xs">Using mock data for testing. Limited ZIP code coverage.</p>
+                <p className="text-xs">Using mock data for testing. Limited ZIP/PIN code coverage.</p>
               </div>
             </div>
           )}
@@ -87,8 +87,8 @@ export const LocationRequest = ({ onLocationGranted, onZipSubmit, mood, error }:
             <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg text-green-700 dark:text-green-300">
               <CheckCircle className="w-4 h-4" />
               <div className="text-left">
-                <p className="text-sm font-medium">Full ZIP Code Coverage</p>
-                <p className="text-xs">All US ZIP codes supported via OpenCage API</p>
+                <p className="text-sm font-medium">Full ZIP/PIN Code Coverage</p>
+                <p className="text-xs">US ZIP and Indian PIN codes supported via OpenCage/Nominatim</p>
               </div>
             </div>
           )}
@@ -102,6 +102,7 @@ export const LocationRequest = ({ onLocationGranted, onZipSubmit, mood, error }:
 
           <div className="space-y-3">
             <Button
+              type="button"
               variant="action"
               onClick={handleRequestLocation}
               className="w-full h-12"
@@ -111,11 +112,12 @@ export const LocationRequest = ({ onLocationGranted, onZipSubmit, mood, error }:
             </Button>
 
             <Button
+              type="button"
               variant="ghost"
               onClick={() => setShowZipInput(true)}
               className="w-full text-muted-foreground"
             >
-              I'll enter my ZIP code instead
+              I'll enter my ZIP/PIN code instead
             </Button>
 
             {showZipInput && (
@@ -124,10 +126,10 @@ export const LocationRequest = ({ onLocationGranted, onZipSubmit, mood, error }:
                   <Input
                     value={zip}
                     onChange={(e) => setZip(e.target.value)}
-                    placeholder="Enter ZIP code (e.g., 10001)"
+                    placeholder="Enter ZIP or PIN code (e.g., 10001 or 560001)"
                     className="flex-1"
                     maxLength={10}
-                    pattern="^\d{5}(-\d{4})?$"
+                    pattern="^([0-9]{5}(-[0-9]{4})?|[0-9]{6})$"
                   />
                   <Button 
                     type="submit" 
@@ -138,15 +140,15 @@ export const LocationRequest = ({ onLocationGranted, onZipSubmit, mood, error }:
                   </Button>
                 </div>
                 
-                {/* ZIP Code Help Text */}
+                {/* Postal Code Help Text */}
                 <div className="text-xs text-muted-foreground text-left">
-                  <p>• Enter a 5-digit US ZIP code</p>
-                  <p>• Format: 10001 or 10001-1234</p>
+                  <p>• Enter a 5-digit US ZIP or 6-digit Indian PIN code</p>
+                  <p>• Formats: 10001, 10001-1234, or 560001</p>
                   {usingMockData && (
                     <p>• Limited coverage in development mode</p>
                   )}
                   {!usingMockData && (
-                    <p>• All US ZIP codes supported</p>
+                    <p>• US ZIP and Indian PIN codes supported</p>
                   )}
                 </div>
               </form>
@@ -165,12 +167,12 @@ export const LocationRequest = ({ onLocationGranted, onZipSubmit, mood, error }:
           </p>
           
           {/* API Information */}
-          {usingMockData && (
-            <div className="text-xs text-muted-foreground">
-              <p>💡 Want full ZIP code coverage?</p>
-              <p>Get a free API key at <a href="https://opencagedata.com/users/sign_up" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">opencagedata.com</a></p>
-            </div>
-          )}
+            {usingMockData && (
+              <div className="text-xs text-muted-foreground">
+                <p>💡 Want full postal code coverage?</p>
+                <p>Get a free API key at <a href="https://opencagedata.com/users/sign_up" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">opencagedata.com</a></p>
+              </div>
+            )}
         </div>
       </div>
     </div>

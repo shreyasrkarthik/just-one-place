@@ -10,6 +10,9 @@ export interface UserLocation {
 const OPENCAGE_API_KEY = import.meta.env.VITE_OPENCAGE_API_KEY || '';
 const OPENCAGE_BASE_URL = 'https://api.opencagedata.com/geocode/v1/json';
 
+// Nominatim API for Indian PIN code lookup (no API key required)
+const NOMINATIM_BASE_URL = 'https://nominatim.openstreetmap.org/search';
+
 // Fallback coordinates for error cases (Austin, TX)
 const FALLBACK_LOCATION = {
   latitude: 30.2672,
@@ -19,7 +22,7 @@ const FALLBACK_LOCATION = {
 };
 
 export const getCurrentLocation = (): Promise<UserLocation> => {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
       reject(new Error("Geolocation is not supported by this browser"));
       return;
@@ -167,34 +170,43 @@ export const getCurrentLocation = (): Promise<UserLocation> => {
 };
 
 export const getLocationFromZip = async (zip: string): Promise<UserLocation> => {
-  // Looking up ZIP code
-  
+  // Looking up postal code (ZIP/PIN)
+
   try {
-    // Clean the ZIP code input
+    // Clean the code input
     const cleanZip = zip.trim().replace(/\s+/g, '');
-    // ZIP code cleaned
-    
-    // Basic ZIP code validation (US format: 5 digits or 5+4 format)
-    if (!/^\d{5}(-\d{4})?$/.test(cleanZip)) {
-      const error = 'Invalid ZIP code format. Please enter a valid 5-digit ZIP code.';
-      console.error(`❌ ZIP validation failed: ${error}`);
+    // Postal code cleaned
+
+    const isUSZip = /^\d{5}(-\d{4})?$/.test(cleanZip);
+    const isIndianPin = /^\d{6}$/.test(cleanZip);
+
+    if (!isUSZip && !isIndianPin) {
+      const error = 'Invalid postal code format. Please enter a valid 5-digit US ZIP or 6-digit Indian PIN code.';
+      console.error(`❌ Postal code validation failed: ${error}`);
       throw new Error(error);
     }
-    // ZIP code format validated
+    // Postal code format validated
 
-    // If no API key is configured, fall back to mock data for development
-    if (!OPENCAGE_API_KEY) {
-      // API key not configured, using mock data
+    // US ZIP code without API key uses mock data
+    if (isUSZip && !OPENCAGE_API_KEY) {
       const mockLocation = getMockLocationFromZip(cleanZip);
       return mockLocation;
     }
 
-    // Calling OpenCage Geocoding API
-    
-    // Call OpenCage Geocoding API
-    const response = await fetch(
-      `${OPENCAGE_BASE_URL}?q=${encodeURIComponent(cleanZip)}&countrycode=us&key=${OPENCAGE_API_KEY}&limit=1`
-    );
+    // Build API request depending on code type
+    let response: Response;
+    if (isIndianPin && !OPENCAGE_API_KEY) {
+      // Use Nominatim for Indian PIN when OpenCage key is missing
+      response = await fetch(
+        `${NOMINATIM_BASE_URL}?postalcode=${cleanZip}&country=india&format=json&limit=1`
+      );
+    } else {
+      // Use OpenCage for US ZIP or when API key is available
+      const countryCode = isIndianPin ? 'in' : 'us';
+      response = await fetch(
+        `${OPENCAGE_BASE_URL}?q=${encodeURIComponent(cleanZip)}&countrycode=${countryCode}&key=${OPENCAGE_API_KEY}&limit=1`
+      );
+    }
 
     if (!response.ok) {
       const error = `API request failed: ${response.status}`;
@@ -203,35 +215,44 @@ export const getLocationFromZip = async (zip: string): Promise<UserLocation> => 
     }
 
     const data = await response.json();
-    // API Response received
 
-    if (!data.results || data.results.length === 0) {
-      const error = 'ZIP code not found. Please check and try again.';
-      console.error(`❌ ${error}`);
-      throw new Error(error);
+    // Parse responses differently for OpenCage vs Nominatim
+    let location: UserLocation;
+    if (isIndianPin && !OPENCAGE_API_KEY) {
+      if (!data || data.length === 0) {
+        const error = 'PIN code not found. Please check and try again.';
+        console.error(`❌ ${error}`);
+        throw new Error(error);
+      }
+      const result = data[0];
+      const address = result.address || {};
+      location = {
+        latitude: parseFloat(result.lat),
+        longitude: parseFloat(result.lon),
+        city: address.city || address.town || address.village || address.state_district,
+        state: address.state,
+        zipCode: cleanZip
+      };
+    } else {
+      if (!data.results || data.results.length === 0) {
+        const error = 'Postal code not found. Please check and try again.';
+        console.error(`❌ ${error}`);
+        throw new Error(error);
+      }
+
+      const result = data.results[0];
+      const components = result.components;
+      location = {
+        latitude: result.geometry.lat,
+        longitude: result.geometry.lng,
+        city: components.city || components.town || components.village || components.county,
+        state: components.state_code || components.state,
+        zipCode: cleanZip
+      };
     }
-
-    const result = data.results[0];
-    const components = result.components;
-    
-    console.log('🔍 API Result details:', {
-      geometry: result.geometry,
-      components: components,
-      formatted: result.formatted
-    });
-
-    // Extract location information
-    const location: UserLocation = {
-      latitude: result.geometry.lat,
-      longitude: result.geometry.lng,
-      city: components.city || components.town || components.village || components.county,
-      state: components.state_code || components.state,
-      zipCode: cleanZip
-    };
 
     // Location data extracted
 
-    // Validate that we got meaningful coordinates
     if (!location.city || !location.state) {
       console.warn('⚠️ Incomplete location data from API, using fallback');
       const fallbackLocation = {
@@ -247,15 +268,15 @@ export const getLocationFromZip = async (zip: string): Promise<UserLocation> => 
       coordinates: `${location.latitude}, ${location.longitude}`,
       city: location.city,
       state: location.state,
-      source: 'OpenCage API'
+      source: isIndianPin && !OPENCAGE_API_KEY ? 'Nominatim' : 'OpenCage API'
     });
 
     return location;
 
   } catch (error) {
-    console.error('❌ Error getting location from ZIP:', error);
+    console.error('❌ Error getting location from postal code:', error);
     
-    // Fallback to mock data for known ZIP codes
+    // Fallback to mock data for known postal codes
     try {
       console.log('🔄 Attempting fallback to mock data...');
       const mockLocation = getMockLocationFromZip(zip);
@@ -275,7 +296,7 @@ export const getLocationFromZip = async (zip: string): Promise<UserLocation> => 
 
 // Enhanced mock data for development/testing when API is unavailable
 const getMockLocationFromZip = (zip: string): UserLocation => {
-  console.log(`🎭 Looking up ZIP code ${zip} in mock data...`);
+  console.log(`🎭 Looking up postal code ${zip} in mock data...`);
   
   const mockLocations: Record<string, { lat: number; lng: number; city: string; state: string }> = {
     // Austin, TX
@@ -346,7 +367,12 @@ const getMockLocationFromZip = (zip: string): UserLocation => {
     "94103": { lat: 37.7749, lng: -122.4194, city: "San Francisco", state: "CA" },
     "94104": { lat: 37.7749, lng: -122.4194, city: "San Francisco", state: "CA" },
     "94105": { lat: 37.7749, lng: -122.4194, city: "San Francisco", state: "CA" },
-    "94107": { lat: 37.7749, lng: -122.4194, city: "San Francisco", state: "CA" }
+    "94107": { lat: 37.7749, lng: -122.4194, city: "San Francisco", state: "CA" },
+
+    // India
+    "560001": { lat: 12.9716, lng: 77.5946, city: "Bengaluru", state: "KA" },
+    "110001": { lat: 28.6142, lng: 77.2024, city: "New Delhi", state: "DL" },
+    "400001": { lat: 18.9388, lng: 72.8354, city: "Mumbai", state: "MH" }
   };
 
   const location = mockLocations[zip];
@@ -369,9 +395,9 @@ const getMockLocationFromZip = (zip: string): UserLocation => {
     return mockLocation;
   }
 
-  // If ZIP not in mock data, throw error to trigger fallback
-  console.warn(`⚠️ ZIP code ${zip} not found in mock data`);
-  throw new Error(`ZIP code ${zip} not found in mock data`);
+  // If postal code not in mock data, throw error to trigger fallback
+  console.warn(`⚠️ Postal code ${zip} not found in mock data`);
+  throw new Error(`Postal code ${zip} not found in mock data`);
 };
 
 // Helper function to find the closest mock location based on coordinates
@@ -386,7 +412,12 @@ const getMockLocationFromCoordinates = (lat: number, lng: number): UserLocation 
     { lat: 39.7392, lng: -104.9903, city: "Denver", state: "CO" },
     { lat: 45.5152, lng: -122.6784, city: "Portland", state: "OR" },
     { lat: 36.1627, lng: -86.7816, city: "Nashville", state: "TN" },
-    { lat: 37.7749, lng: -122.4194, city: "San Francisco", state: "CA" }
+    { lat: 37.7749, lng: -122.4194, city: "San Francisco", state: "CA" },
+
+    // India
+    { lat: 12.9716, lng: 77.5946, city: "Bengaluru", state: "KA" },
+    { lat: 28.6139, lng: 77.2090, city: "New Delhi", state: "DL" },
+    { lat: 19.0760, lng: 72.8777, city: "Mumbai", state: "MH" }
   ];
 
   let closestLocation = null;

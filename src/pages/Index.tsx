@@ -62,12 +62,12 @@ export const Index = () => {
       const location = await getLocationFromZip(zip);
       setUserLocation(location);
       
-      // Get recommendation immediately after ZIP location is obtained
+      // Get recommendation immediately after postal code location is obtained
       const rec = await getLocationAwareRecommendation(userMood, location);
       setRecommendation(rec);
       setCurrentStep("recommendation");
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Failed to get location from ZIP code");
+      setError(error instanceof Error ? error.message : "Failed to get location from postal code");
       setCurrentStep("location");
     }
   };
