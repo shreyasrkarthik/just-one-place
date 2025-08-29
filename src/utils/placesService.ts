@@ -187,8 +187,8 @@ export const getLocationAwareRecommendation = async (
       // Generate location-aware address
       const locationText = userLocation.city && userLocation.state 
         ? `${userLocation.city}, ${userLocation.state}`
-        : userLocation.zipCode 
-          ? `ZIP ${userLocation.zipCode}`
+        : userLocation.zipCode
+          ? `ZIP/PIN ${userLocation.zipCode}`
           : "your area";
       
       const fullAddress = selectedPlace.address.includes(userLocation.city || '') 
@@ -333,7 +333,7 @@ export const getLocationAwareRecommendation = async (
   const locationText = userLocation.city && userLocation.state 
     ? `${userLocation.city}, ${userLocation.state}`
     : userLocation.zipCode 
-      ? `ZIP ${userLocation.zipCode}`
+      ? `ZIP/PIN ${userLocation.zipCode}`
       : "your area";
     
   const fullAddress = selectedPlace.latitude !== 0 

@@ -122,55 +122,60 @@ export class GooglePlacesService {
 
     const url = `${API_CONFIG.GOOGLE_PLACES.BASE_URL}/nearbysearch/json?${query}&key=${API_CONFIG.GOOGLE_PLACES.API_KEY}`;
 
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Google Places API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.status !== 'OK') {
-        throw new Error(`Google Places API error: ${data.status}`);
-      }
-
-      return data.results.map((place: any) => ({
-        id: place.place_id,
-        name: place.name,
-        address: place.vicinity,
-        latitude: place.geometry.location.lat,
-        longitude: place.geometry.location.lng,
-        category: place.types[0] || 'establishment',
-        rating: place.rating,
-        priceLevel: place.price_level ? '$'.repeat(place.price_level) : undefined,
-        openNow: place.opening_hours?.open_now,
-        photos: place.photos?.map((photo: any) => 
-          `${API_CONFIG.GOOGLE_PLACES.BASE_URL}/photo?maxwidth=400&photoreference=${photo.photo_reference}&key=${API_CONFIG.GOOGLE_PLACES.API_KEY}`
-        ),
-        distance: getDistanceInMiles(latitude, longitude, place.geometry.location.lat, place.geometry.location.lng)
-      }));
-
-    } catch (error) {
-      throw error;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Google Places API error: ${response.status}`);
     }
+
+    const data = await response.json();
+
+    if (data.status !== 'OK') {
+      throw new Error(`Google Places API error: ${data.status}`);
+    }
+
+    interface GooglePlaceResult {
+      place_id: string;
+      name: string;
+      vicinity: string;
+      geometry: { location: { lat: number; lng: number } };
+      types: string[];
+      rating?: number;
+      price_level?: number;
+      opening_hours?: { open_now?: boolean };
+      photos?: { photo_reference: string }[];
+    }
+
+    const results = data.results as GooglePlaceResult[];
+
+    return results.map((place) => ({
+      id: place.place_id,
+      name: place.name,
+      address: place.vicinity,
+      latitude: place.geometry.location.lat,
+      longitude: place.geometry.location.lng,
+      category: place.types[0] || 'establishment',
+      rating: place.rating,
+      priceLevel: place.price_level ? '$'.repeat(place.price_level) : undefined,
+      openNow: place.opening_hours?.open_now,
+      photos: place.photos?.map((photo) =>
+        `${API_CONFIG.GOOGLE_PLACES.BASE_URL}/photo?maxwidth=400&photoreference=${photo.photo_reference}&key=${API_CONFIG.GOOGLE_PLACES.API_KEY}`
+      ),
+      distance: getDistanceInMiles(latitude, longitude, place.geometry.location.lat, place.geometry.location.lng)
+    }));
   }
 
-  async getPlaceDetails(placeId: string): Promise<any> {
+  async getPlaceDetails(placeId: string): Promise<unknown> {
     await this.waitForRateLimit();
 
     const url = `${API_CONFIG.GOOGLE_PLACES.BASE_URL}/details/json?place_id=${placeId}&fields=name,formatted_address,geometry,rating,price_level,opening_hours,website,formatted_phone_number,photos&key=${API_CONFIG.GOOGLE_PLACES.API_KEY}`;
 
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Google Places API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data.result;
-    } catch (error) {
-      throw error;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Google Places API error: ${response.status}`);
     }
+
+    const data = await response.json();
+    return data.result as unknown;
   }
 }
 
@@ -232,58 +237,66 @@ export class FoursquarePlacesService {
 
     // Making API request to Foursquare
 
-    try {
-      // When using API route (proxy), we don't need auth headers - the proxy handles that
-      const headers: Record<string, string> = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      };
+    // When using API route (proxy), we don't need auth headers - the proxy handles that
+    const headers: Record<string, string> = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    };
 
-      const response = await fetch(url, { 
-        method: 'GET',
-        headers 
-      });
+    const response = await fetch(url, {
+      method: 'GET',
+      headers
+    });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Foursquare API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (!data.results || data.results.length === 0) {
-        return [];
-      }
-      
-      return data.results.map((place: any) => {
-        const address = place.location?.formatted_address || 
-                       `${place.location?.locality || ''}, ${place.location?.region || ''}`.trim();
-        
-        return {
-          id: place.fsq_place_id,
-          name: place.name,
-          address: address,
-          latitude: place.latitude || 0,
-          longitude: place.longitude || 0,
-          category: place.categories?.[0]?.name || 'establishment',
-          rating: undefined, // Rating not in basic search response
-          priceLevel: undefined, // Price not in basic search response
-          openNow: undefined, // Hours not in basic search response
-          photos: undefined, // Photos not in basic search response
-          website: place.website,
-          phone: place.tel,
-          distance: getDistanceInMiles(
-            latitude, 
-            longitude, 
-            place.latitude || 0, 
-            place.longitude || 0
-          )
-        };
-      });
-
-    } catch (error) {
-      throw error;
+    if (!response.ok) {
+      await response.text();
+      throw new Error(`Foursquare API error: ${response.status}`);
     }
+
+    const data = await response.json();
+
+    if (!data.results || data.results.length === 0) {
+      return [];
+    }
+
+    interface FoursquarePlaceResult {
+      fsq_place_id: string;
+      name: string;
+      location?: { formatted_address?: string; locality?: string; region?: string };
+      latitude?: number;
+      longitude?: number;
+      categories?: { name: string }[];
+      website?: string;
+      tel?: string;
+    }
+
+    const results = data.results as FoursquarePlaceResult[];
+
+    return results.map((place) => {
+      const address = place.location?.formatted_address ||
+                     `${place.location?.locality || ''}, ${place.location?.region || ''}`.trim();
+
+      return {
+        id: place.fsq_place_id,
+        name: place.name,
+        address: address,
+        latitude: place.latitude || 0,
+        longitude: place.longitude || 0,
+        category: place.categories?.[0]?.name || 'establishment',
+        rating: undefined,
+        priceLevel: undefined,
+        openNow: undefined,
+        photos: undefined,
+        website: place.website,
+        phone: place.tel,
+        distance: getDistanceInMiles(
+          latitude,
+          longitude,
+          place.latitude || 0,
+          place.longitude || 0
+        )
+      };
+    });
   }
 }
 
@@ -414,7 +427,7 @@ export class RealPlacesService {
     });
   }
 
-  async getPlaceDetails(placeId: string, source: 'google' | 'foursquare' = 'google'): Promise<any> {
+  async getPlaceDetails(placeId: string, source: 'google' | 'foursquare' = 'google'): Promise<unknown> {
     if (source === 'google' && API_CONFIG.GOOGLE_PLACES.API_KEY) {
       return await this.googleService.getPlaceDetails(placeId);
     }

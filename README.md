@@ -4,7 +4,7 @@ Stop scrolling through endless options. VibePick gives you exactly one perfect r
 
 ## ✨ Features
 
-- 🗺️ **ZIP Code to Location**: Comprehensive US ZIP code coverage via OpenCage API
+- 🗺️ **Postal Code to Location**: US ZIP and Indian PIN code coverage via OpenCage/Nominatim
 - 🎯 **Mood-Based Recommendations**: Get personalized place suggestions based on your current mood
 - 📍 **Location Awareness**: Find places within 10km of your location
 - 🏢 **Real Place Data**: Dynamic recommendations from Foursquare Places API
@@ -17,7 +17,7 @@ Stop scrolling through endless options. VibePick gives you exactly one perfect r
 ### Prerequisites
 - Node.js 18+ and npm
 - Foursquare API key (free tier: 50,000 requests/month)
-- OpenCage API key (free tier: 2,500 requests/day)
+- OpenCage API key (free tier: 2,500 requests/day) for US ZIP lookup
 
 ### Installation
 
@@ -44,7 +44,7 @@ Create a `.env` file in your project root:
 # Primary API for place recommendations
 VITE_FOURSQUARE_API_KEY=your_foursquare_api_key_here
 
-# Required for ZIP code to location conversion
+# Required for US ZIP code to location conversion
 VITE_OPENCAGE_API_KEY=your_opencage_api_key_here
 
 # Optional fallback APIs
@@ -91,16 +91,16 @@ This project uses the Foursquare Places API for dynamic recommendations:
 
 ## 🗺️ Location Services
 
-ZIP code to location conversion via OpenCage API:
+Postal code to location conversion via OpenCage (US) and Nominatim (India):
 
-- **Full Coverage**: All US ZIP codes (42,000+ codes)
+- **Full Coverage**: All US ZIP codes and Indian PIN codes
 - **Accurate Data**: Real coordinates and city/state information
 - **Rate Limiting**: Respects API limits and best practices
 
 ## 🎯 How It Works
 
-1. **User Input**: Enter ZIP code or share GPS location
-2. **Location Conversion**: ZIP code converted to coordinates via OpenCage API
+1. **User Input**: Enter ZIP/PIN code or share GPS location
+2. **Location Conversion**: Postal code converted to coordinates via OpenCage or Nominatim
 3. **Mood Selection**: Choose your current mood from available options
 4. **API Search**: Foursquare searches by mood-specific categories and keywords
 5. **Smart Filtering**: Places filtered by mood, rating, and distance
